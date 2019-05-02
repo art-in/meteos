@@ -1,4 +1,8 @@
 /.vscode
-/build/include
 /docker
+/include
 /scripts
+.clang-format
+.dockerignore
+.gitignore
+readme.md
