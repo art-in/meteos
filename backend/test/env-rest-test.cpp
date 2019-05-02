@@ -1,5 +1,3 @@
-#define CATCH_CONFIG_MAIN
-
 #include <cpprest/http_client.h>
 #include <cpprest/json.h>
 #include <catch2/catch.hpp>
