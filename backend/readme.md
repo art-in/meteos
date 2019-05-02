@@ -1,6 +1,6 @@
 Meteos Backend.
 
-Provides rest api for storing environment data from Sensor and serving it to Frontend.
+Rest api service for storing environment data received from Sensor and serving it to Frontend.
 
 ---
 
