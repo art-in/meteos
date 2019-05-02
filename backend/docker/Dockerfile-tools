@@ -1,0 +1,26 @@
+# base docker image with all the necessary build tools and project dependencies.
+# caching it in separate image to make actual builds faster.
+# ---
+FROM ubuntu:18.04
+
+# install tools
+RUN apt-get update
+RUN apt-get install -y g++-8 curl unzip tar git make
+
+# install cmake (from direct link because it's newer version than in package repo)
+WORKDIR /opt/cmake
+RUN curl -L https://github.com/Kitware/CMake/releases/download/v3.14.3/cmake-3.14.3-Linux-x86_64.sh --output cmake.sh
+RUN chmod +x cmake.sh
+RUN ./cmake.sh --prefix=/opt/cmake --skip-license
+RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+
+# install project dependencies
+RUN apt-get install -y libsqlite3-dev=3.22.0\* libcpprest-dev=2.10.2\*
+
+# install catch2
+WORKDIR /opt
+RUN git clone https://github.com/catchorg/Catch2.git
+WORKDIR /opt/Catch2
+RUN git checkout v2.7.2
+RUN cmake -Bbuild -H. -DBUILD_TESTING=OFF -DCMAKE_CXX_COMPILER=/usr/bin/g++-8
+RUN cmake --build build/ --target install 
