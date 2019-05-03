@@ -32,21 +32,35 @@ void EnvDb::add_sample(Sample sample) {
   exec_query(query);
 }
 
-std::vector<Sample> EnvDb::get_samples() {
+std::vector<Sample> EnvDb::get_samples(std::string from, std::string to) {
   std::vector<Sample> res;
 
-  exec_query(
-      "SELECT DATETIME, TEMPERATURE, HUMIDITY, PRESSURE, CO2 FROM SAMPLES",
-      [&](auto stmt) {
-        std::string datetime =
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        double temperature = sqlite3_column_double(stmt, 1);
-        double humidity = sqlite3_column_double(stmt, 2);
-        double pressure = sqlite3_column_double(stmt, 3);
-        double co2 = sqlite3_column_double(stmt, 4);
+  if (from.empty()) {
+    from = "0000";
+  }
 
-        res.push_back({datetime, temperature, humidity, pressure, co2});
-      });
+  if (to.empty()) {
+    to = "9999";
+  }
+
+  char query[150];
+  sprintf(query,
+          "SELECT DATETIME, TEMPERATURE, HUMIDITY, PRESSURE, CO2 FROM SAMPLES "
+          "WHERE DATETIME BETWEEN '%s' AND '%s'",
+          from.c_str(), to.c_str());
+
+  exec_query(query, [&](auto stmt) {
+    std::string datetime =
+        reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+    double temperature = sqlite3_column_double(stmt, 1);
+    double humidity = sqlite3_column_double(stmt, 2);
+    double pressure = sqlite3_column_double(stmt, 3);
+    double co2 = sqlite3_column_double(stmt, 4);
+
+    res.push_back({datetime, temperature, humidity, pressure, co2});
+  });
 
   return res;
 }
+
+void EnvDb::delete_samples() { exec_query("DELETE FROM SAMPLES"); }

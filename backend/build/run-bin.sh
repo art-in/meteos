@@ -12,7 +12,7 @@ if [[ "$1" == "--test" ]] ; then
     sleep 0.5s
 
     # run tests
-    ./bin/meteos-backend-test --reporter compact --use-colour yes
+    ./bin/meteos-backend-test --use-colour yes # --durations yes
 else
     ./bin/meteos-backend
 fi

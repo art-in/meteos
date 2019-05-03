@@ -9,48 +9,57 @@ using web::http::http_request;
 using web::http::methods;
 using web::http::status_codes;
 
-EnvRest::EnvRest(web::uri url, EnvDb &_db) : listener{url}, db{_db} {
-  listener.support(methods::GET, std::bind(&EnvRest::handle_get, this, _1));
-  listener.support(methods::POST, std::bind(&EnvRest::handle_post, this, _1));
-  open().wait();
+EnvRest::EnvRest(web::uri url, EnvDb &_db) : Rest{url}, db{_db} {
+  reg_handler(methods::GET, "/samples",
+              std::bind(&EnvRest::handle_samples_get, this, _1));
+  reg_handler(methods::POST, "/samples",
+              std::bind(&EnvRest::handle_samples_post, this, _1));
+  reg_handler(methods::DEL, "/samples",
+              std::bind(&EnvRest::handle_samples_del, this, _1));
 }
 
-void EnvRest::handle_get(http_request req) {
-  handle(req, [&] {
-    auto samples = db.get_samples();
-    auto resp = json::value::array();
+void EnvRest::handle_samples_get(http_request req) {
+  std::vector<Sample> samples;
 
-    for (int i = 0; i < samples.size(); i++) {
-      auto sample = samples[i];
-      auto datetime = to_string_t(sample.datetime);
+  auto from = query(req, "from");
+  auto to = query(req, "to");
 
-      auto sample_obj = json::value::object();
+  samples = db.get_samples(from, to);
+  auto resp = json::value::array();
 
-      sample_obj[U("u")] = json::value::string(datetime);
-      sample_obj[U("t")] = sample.temperature;
-      sample_obj[U("h")] = sample.humidity;
-      sample_obj[U("p")] = sample.pressure;
-      sample_obj[U("c")] = sample.co2;
+  for (int i = 0; i < samples.size(); i++) {
+    auto sample = samples[i];
+    auto datetime = to_string_t(sample.datetime);
 
-      resp[i] = sample_obj;
-    }
+    auto sample_obj = json::value::object();
 
-    req.reply(status_codes::OK, resp);
-  });
+    sample_obj[U("u")] = json::value::string(datetime);
+    sample_obj[U("t")] = sample.temperature;
+    sample_obj[U("h")] = sample.humidity;
+    sample_obj[U("p")] = sample.pressure;
+    sample_obj[U("c")] = sample.co2;
+
+    resp[i] = sample_obj;
+  }
+
+  req.reply(status_codes::OK, resp);
 };
 
-void EnvRest::handle_post(http_request req) {
-  handle(req, [&] {
-    json::value obj = req.extract_json().get();
+void EnvRest::handle_samples_post(http_request req) {
+  json::value obj = req.extract_json().get();
 
-    auto datetime = get_now_datetime_iso();
-    auto temperature = obj[U("t")].as_double();
-    auto humidity = obj[U("h")].as_double();
-    auto pressure = obj[U("p")].as_double();
-    auto co2 = obj[U("c")].as_double();
+  auto datetime = get_now_datetime_iso();
+  auto temperature = obj[U("t")].as_double();
+  auto humidity = obj[U("h")].as_double();
+  auto pressure = obj[U("p")].as_double();
+  auto co2 = obj[U("c")].as_double();
 
-    db.add_sample({datetime, temperature, humidity, pressure, co2});
+  db.add_sample({datetime, temperature, humidity, pressure, co2});
 
-    req.reply(status_codes::OK);
-  });
+  req.reply(status_codes::OK);
 };
+
+void EnvRest::handle_samples_del(http_request req) {
+  db.delete_samples();
+  req.reply(status_codes::OK);
+}
