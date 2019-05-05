@@ -40,7 +40,6 @@ void Db::exec_query(std::string query,
         break;
       case SQLITE_DONE:
         done = true;
-        return;
         break;
       default:
         throw std::runtime_error("Failed to execute statement: " +
