@@ -1,4 +1,12 @@
+#include <cpprest/http_client.h>
 #include <string>
+
+#include "file-logger.h"
+
+void log_service_start(FileLogger, web::uri, std::string db_path,
+                       std::string log_path);
+void log_service_stop(FileLogger);
+void log_service_start_failed(FileLogger, std::exception&);
 
 /**
  * Freezes main thread until cin is closed.

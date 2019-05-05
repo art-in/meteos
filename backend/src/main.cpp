@@ -5,22 +5,35 @@
 
 #include "env-db.h"
 #include "env-rest.h"
+#include "utils/file-logger.h"
 #include "utils/utils.h"
 
 using std::filesystem::path;
 using utility::conversions::to_string_t;
+using utility::conversions::to_utf8string;
 
-constexpr auto ADDR = "http://0.0.0.0:8080";
+constexpr auto URL = "http://0.0.0.0:8080";
 constexpr auto DB_FILE = "/data/env.db";
+constexpr auto LOG_FILE = "/data/env.log";
 
-int main(int argc, char *argv[]) {
-  std::string db_path{path(argv[0]).parent_path().u8string() + DB_FILE};
-  web::uri url{to_string_t(ADDR)};
+int main(int argc, char* argv[]) {
+  std::string bin_path{path(argv[0]).parent_path().u8string()};
+  std::string log_path{bin_path + LOG_FILE};
+  std::string db_path{bin_path + DB_FILE};
+  web::uri url{to_string_t(URL)};
 
-  EnvDb env_db{db_path};
-  EnvRest env_rest{url, env_db};
+  FileLogger logger{log_path};
 
-  ucout << U("Listening at: ") << url.to_string() << std::endl;
+  try {
+    EnvDb env_db{db_path};
+    EnvRest env_rest{url, env_db, logger};
 
-  freeze_thread_until_cin_closed();
+    log_service_start(logger, url, db_path, log_path);
+    freeze_thread_until_cin_closed();
+    log_service_stop(logger);
+
+  } catch (std::exception& e) {
+    log_service_start_failed(logger, e);
+    return 1;
+  }
 }

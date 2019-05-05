@@ -12,6 +12,8 @@ Db::Db(std::string db_path) {
   }
 }
 
+Db::~Db() { sqlite3_close_v2(db); }
+
 sqlite3_stmt* Db::prepare_statement(std::string query) {
   sqlite3_stmt* statement;
   if (SQLITE_OK !=

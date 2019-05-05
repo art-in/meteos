@@ -4,16 +4,20 @@
 
 namespace json = web::json;
 using std::placeholders::_1;
+using std::placeholders::_2;
+using utility::string_t;
 using utility::conversions::to_string_t;
+using utility::conversions::to_utf8string;
 using web::http::http_request;
 using web::http::methods;
 using web::http::status_codes;
 
-EnvRest::EnvRest(web::uri url, EnvDb &_db) : Rest{url}, db{_db} {
+EnvRest::EnvRest(web::uri url, EnvDb &_db, FileLogger logger)
+    : Rest{url, logger}, db{_db} {
   reg_handler(methods::GET, "/samples",
               std::bind(&EnvRest::handle_samples_get, this, _1));
   reg_handler(methods::POST, "/samples",
-              std::bind(&EnvRest::handle_samples_post, this, _1));
+              std::bind(&EnvRest::handle_samples_post, this, _1, _2));
   reg_handler(methods::DEL, "/samples",
               std::bind(&EnvRest::handle_samples_del, this, _1));
 }
@@ -45,8 +49,8 @@ void EnvRest::handle_samples_get(http_request req) {
   req.reply(status_codes::OK, resp);
 };
 
-void EnvRest::handle_samples_post(http_request req) {
-  json::value obj = req.extract_json().get();
+void EnvRest::handle_samples_post(http_request req, string_t body) {
+  json::value obj = json::value::parse(body);
 
   auto datetime = get_now_datetime_iso();
   auto temperature = obj[U("t")].as_double();
