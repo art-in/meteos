@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # runs built docker image.
+#
 # options:
 # --test - runs tests inside container.
 
@@ -8,15 +9,20 @@ PROJECT_NAME=meteos-backend
 DOCKER_IMAGE=$PROJECT_NAME
 
 # go to project root
-cd $(dirname $(realpath "$0")) && cd ..
+cd $(dirname $(realpath "$0")) && cd ../..
 
 # handle args
-if [[ "$1" == "--test" ]] ; then
-    TEST=1
-fi
+while test $# -gt 0
+do
+    case "$1" in
+        --test) TEST=1 ;;
+	*) echo "Invalid argument '$1'." && exit 1 ;;
+    esac
+    shift
+done
 
 # run
-echo "Running docker container '$PROJECT_NAME'..." ; echo ""
+echo "Running docker container '$DOCKER_IMAGE'..." ; echo ""
 if [[ $TEST ]] ; then
     docker run $DOCKER_IMAGE --test
 else

@@ -13,15 +13,15 @@ Prerequisites: (1) [docker](https://www.docker.com/), (2) git, (3) unix shell (e
 git clone https://github.com/artin-phares/meteos
 cd ./meteos/backend
 
-./scripts/build.sh    # build inside container
-                      # --test  - build tests
-                      # --tools - rebuild tools
+./docker/scripts/build.sh    # build inside container
+                             # --clean - skip cache
+                             # --test  - build tests
 
-./scripts/run.sh      # run inside container
-                      # --test  - run tests
+./docker/scripts/run.sh      # run inside container
+                             # --test  - run tests
 
-./scripts/start.sh    # build & run
-./scripts/test.sh     # build & run tests
+./docker/scripts/start.sh    # build & run
+./docker/scripts/test.sh     # build & run tests
 ```
 
 Notes:  

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# creates docker image with necessary tools and builds project inside it.
+# creates docker image with necessary tools and builds project inside of it.
+#
 # options:
-# --tools - recreates docker image with build tools even if it already exists.
+# --clean - recreates docker image with build tools even if it already exists.
 #           use it when changing build tools or project dependencies.
 # --test  - additionaly builds tests.
 
@@ -14,14 +15,15 @@ DOCKER_IMAGE_TOOLS=$PROJECT_NAME-tools
 DOCKER_IMAGE_TOOLS_EXISTS=$(docker image ls | grep $DOCKER_IMAGE_TOOLS)
 
 # go to project root
-cd $(dirname $(realpath "$0")) && cd ..
+cd $(dirname $(realpath "$0")) && cd ../..
 
 # handle args
 while test $# -gt 0
 do
     case "$1" in
-        --tools) ARG_TOOLS=1 ;;
+        --clean) ARG_CLEAN=1 ;;
         --test) ARG_TEST=1 ;;
+	*) echo "Invalid argument '$1'." && exit 1 ;;
     esac
     shift
 done
@@ -31,7 +33,7 @@ if [ $ARG_TEST ] ; then
 fi
 
 # create docker image with build tools if not exists yet
-if [ -z "$DOCKER_IMAGE_TOOLS_EXISTS" ] || [ $ARG_TOOLS ] ; then
+if [ -z "$DOCKER_IMAGE_TOOLS_EXISTS" ] || [ $ARG_CLEAN ] ; then
     echo "Creating docker image '$DOCKER_IMAGE_TOOLS'..."
     docker build . --no-cache -f ./docker/Dockerfile-tools -t $DOCKER_IMAGE_TOOLS
 else
