@@ -15,10 +15,13 @@ void FileLogger::log(std::string record) { log(LogLevel::INFO, record); }
 void FileLogger::log(LogLevel level, std::string record) {
   lock->lock();
 
-  (*file) << get_now_datetime_iso() << " - " << get_level_str(level) << " - "
-          << record << std::endl;
+  std::string str =
+      get_now_datetime_iso() + " - " + get_level_str(level) + " - " + record;
 
+  (*file) << str << std::endl;
   file->flush();
+
+  std::cout << str << std::endl;
 
   lock->unlock();
 }

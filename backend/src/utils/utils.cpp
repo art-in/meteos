@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -16,23 +15,15 @@ using web::http::http_request;
 
 void log_service_start(FileLogger logger, web::uri url, std::string db_path,
                        std::string log_path) {
-  std::string log_record = "Service started. DB file: " + db_path +
-                           "; Log file: " + log_path +
-                           "; Listening at: " + to_utf8string(url.to_string());
-  logger.log(log_record);
-  std::cout << log_record << std::endl;
+  logger.log("Service started. DB file: " + db_path + "; Log file: " +
+             log_path + "; Listening at: " + to_utf8string(url.to_string()));
 }
 
-void log_service_stop(FileLogger logger) {
-  std::string log_record = "Service stopped.";
-  logger.log(log_record);
-  std::cout << log_record << std::endl;
-}
+void log_service_stop(FileLogger logger) { logger.log("Service stopped."); }
 
 void log_service_start_failed(FileLogger logger, std::exception& e) {
-  std::string log_record = std::string{"Failed to start service: "} + e.what();
-  logger.log(LogLevel::ERROR, log_record);
-  std::cout << log_record << std::endl;
+  logger.log(LogLevel::ERROR,
+             std::string{"Failed to start service: "} + e.what());
 }
 
 void freeze_thread_until_cin_closed() {
