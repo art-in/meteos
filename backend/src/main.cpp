@@ -12,7 +12,7 @@ using std::filesystem::path;
 using utility::conversions::to_string_t;
 using utility::conversions::to_utf8string;
 
-constexpr auto URL = "http://0.0.0.0:8080";
+constexpr auto URL = "http://0.0.0.0:3000";
 constexpr auto DB_FILE = "/data/env.db";
 constexpr auto LOG_FILE = "/data/env.log";
 

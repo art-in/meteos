@@ -14,7 +14,7 @@ using web::http::methods;
 using web::http::status_codes;
 using web::http::client::http_client;
 
-constexpr auto ADDR = "http://localhost:8080/";
+constexpr auto ADDR = "http://localhost:3000/";
 constexpr auto JSON = "application/json";
 
 SCENARIO("getting from unknown endpoint") {

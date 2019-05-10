@@ -29,7 +29,7 @@ else
     mkdir -p ./build/data
     docker run \
         --mount type=bind,src=$(pwd)/build/data/,dst=/opt/project/build/bin/data/ \
-        -p 8080:8080  \
+        -p 3000:3000  \
         -i \
         $DOCKER_IMAGE
 fi
