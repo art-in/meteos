@@ -7,6 +7,7 @@
         // turns off eslint rules which are in conflict.
         "plugin:prettier/recommended"
     ],
+    "plugins": ["react-hooks"],
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module",
@@ -56,6 +57,10 @@
         // enforce to use 'const' over 'let' to follow spec meaning
         "prefer-const": [
             "error"
-        ]
+        ],
+
+        // react hooks
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn"
     }
 }
