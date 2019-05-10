@@ -23,6 +23,9 @@ do
 done
 
 if [[ $ARG_DEV ]] ; then
+    # kill previous instances to release the port on restarts
+    ps -ef | grep '/src/server/server.js' | grep -v grep | awk '{print $2}' | xargs -r kill -9
+
     npx webpack-dev-server --config $(pwd)/webpack.config.js --stdin=false --mode=development &
     npx nodemon --legacy-watch --watch $(pwd)/src/server $(pwd)/src/server/server.js
 else
