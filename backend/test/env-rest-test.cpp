@@ -156,6 +156,24 @@ SCENARIO("posting samples") {
       REQUIRE(resp.status_code() == status_codes::InternalError);
     }
   }
+
+  WHEN("posting sample with big numbers") {
+    auto resp = post(client, "/samples",
+                     R"({"t":10000,"h":20000,"p":30000,"c":40000})", JSON);
+
+    THEN("replies with status code 'OK'") {
+      REQUIRE(resp.status_code() == status_codes::OK);
+    }
+  }
+
+  WHEN("posting sample with fractional numbers") {
+    auto resp = post(client, "/samples",
+                     R"({"t":27.1,"h":40.12,"p":748.123,"c":1100.1234})", JSON);
+
+    THEN("replies with status code 'OK'") {
+      REQUIRE(resp.status_code() == status_codes::OK);
+    }
+  }
 }
 
 SCENARIO("deleting samples") {

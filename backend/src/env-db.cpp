@@ -22,12 +22,13 @@ EnvDb::EnvDb(std::string db_path) : Db(db_path) {
 }
 
 void EnvDb::add_sample(Sample sample) {
-  char query[150];
-  sprintf(query,
-          "INSERT INTO SAMPLES(DATETIME, TEMPERATURE, HUMIDITY, PRESSURE, CO2) "
-          "VALUES('%s', '%f', '%f', '%f', '%f')",
-          sample.datetime.c_str(), sample.temperature, sample.humidity,
-          sample.pressure, sample.co2);
+  char query[500];
+  snprintf(
+      query, sizeof(query),
+      "INSERT INTO SAMPLES(DATETIME, TEMPERATURE, HUMIDITY, PRESSURE, CO2) "
+      "VALUES('%s', '%f', '%f', '%f', '%f')",
+      sample.datetime.c_str(), sample.temperature, sample.humidity,
+      sample.pressure, sample.co2);
 
   exec_query(query);
 }
@@ -43,11 +44,11 @@ std::vector<Sample> EnvDb::get_samples(std::string from, std::string to) {
     to = "9999";
   }
 
-  char query[150];
-  sprintf(query,
-          "SELECT DATETIME, TEMPERATURE, HUMIDITY, PRESSURE, CO2 FROM SAMPLES "
-          "WHERE DATETIME BETWEEN '%s' AND '%s'",
-          from.c_str(), to.c_str());
+  char query[200];
+  snprintf(query, sizeof(query),
+           "SELECT DATETIME, TEMPERATURE, HUMIDITY, PRESSURE, CO2 FROM SAMPLES "
+           "WHERE DATETIME BETWEEN '%s' AND '%s'",
+           from.c_str(), to.c_str());
 
   exec_query(query, [&](auto stmt) {
     std::string datetime =
