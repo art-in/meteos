@@ -83,8 +83,9 @@ SCENARIO("getting samples") {
     REQUIRE(samples.size() == 4);
 
     WHEN("getting samples with 'from' query") {
-      std::string from =
-          to_utf8string(samples[1].as_object()[U("u")].as_string());
+      auto time = samples[1].as_object()[U("u")].as_string();
+      auto from = to_utf8string(web::uri::encode_data_string(time));
+
       resp = get(client, std::string{"/samples?from="} + from);
 
       THEN("replies with samples created after that datetime") {
@@ -98,8 +99,9 @@ SCENARIO("getting samples") {
     }
 
     WHEN("getting samples with 'to' query") {
-      std::string to =
-          to_utf8string(samples[1].as_object()[U("u")].as_string());
+      auto time = samples[1].as_object()[U("u")].as_string();
+      auto to = to_utf8string(web::uri::encode_data_string(time));
+
       resp = get(client, std::string{"/samples?to="} + to);
 
       THEN("replies with samples created before that datetime") {
@@ -112,10 +114,12 @@ SCENARIO("getting samples") {
     }
 
     WHEN("getting samples with 'from' and 'to' query") {
-      std::string from =
-          to_utf8string(samples[1].as_object()[U("u")].as_string());
-      std::string to =
-          to_utf8string(samples[2].as_object()[U("u")].as_string());
+      auto time1 = samples[1].as_object()[U("u")].as_string();
+      auto time2 = samples[2].as_object()[U("u")].as_string();
+
+      auto from = to_utf8string(web::uri::encode_data_string(time1));
+      auto to = to_utf8string(web::uri::encode_data_string(time2));
+
       resp = get(client, std::string{"/samples?from="} + from + "&to=" + to);
 
       THEN("replies with samples created between that datetime") {

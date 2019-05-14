@@ -57,5 +57,7 @@ std::string get_now_datetime_iso() {
 
 std::string query(http_request req, std::string key) {
   auto k = to_string_t(key);
-  return to_utf8string(web::uri::split_query(req.relative_uri().query())[k]);
+  auto query = web::uri::decode(req.relative_uri().query());
+  auto value = web::uri::split_query(query)[k];
+  return to_utf8string(value);
 }
