@@ -13,6 +13,7 @@ while test $# -gt 0
 do
     case "$1" in
         --dev) ARG_DEV=1 ;;
+        --backend-url*) ARG_BACKEND_URL=$1 ;;
         # sleep infinity instead of just exit, because when container starts with
         # vs-code 'open folder in container' entry point with this script is not 
         # getting overriden with "sleep infinity" as it should.
@@ -27,7 +28,7 @@ if [[ $ARG_DEV ]] ; then
     ps -ef | grep '/src/server/server.js' | grep -v grep | awk '{print $2}' | xargs -r kill -9
 
     npx webpack-dev-server --config $(pwd)/webpack.config.js --stdin=false --mode=development &
-    npx nodemon --legacy-watch --watch $(pwd)/src/server $(pwd)/src/server/server.js
+    npx nodemon --legacy-watch --watch $(pwd)/src/server $(pwd)/src/server/server.js $ARG_BACKEND_URL
 else
-    node $(pwd)/src/server/server.js
+    node $(pwd)/src/server/server.js $ARG_BACKEND_URL
 fi

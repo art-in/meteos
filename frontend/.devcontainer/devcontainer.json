@@ -4,7 +4,10 @@
 	"name": "meteos-frontend",
 	"context": "..",
 	"dockerFile": "../docker/Dockerfile",
-	"appPort": [3000, 8080],
+	"appPort": [
+		3001, // nodejs server
+		8080 // webpack dev server
+	],
 	"extensions": [
 		"eamodio.gitlens",
 		"dbaeumer.vscode-eslint",

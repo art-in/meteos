@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-# set entry (forwards --dev arg from cli)
+# set entry (forwards args from cli)
 ENTRYPOINT ["bash", "/opt/project/scripts/run.sh"]
 
 # install tools

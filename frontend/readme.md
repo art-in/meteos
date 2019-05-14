@@ -17,10 +17,10 @@ cd meteos/frontend
                                  # --clean - skip cache
 
 ./docker/scripts/run.sh          # run inside container
+                                 # --backend-url (required)
                                  # --dev - rebuild on src/ changes
 
 ./docker/scripts/start.sh        # build & run
-./docker/scripts/start-dev.sh    # build & run in dev mode
 ```
 
 Notes:  
@@ -34,6 +34,6 @@ Run prebuilt docker image
 Prerequisites: (1) [docker](https://www.docker.com/).
 
 ```
-# download image from docker hub and run it (set port)
+# download image from docker hub and run it (set port, TODO: pass backend-url)
 docker run -di -p <port>:3000 artinphares/meteos-frontend
 ```
