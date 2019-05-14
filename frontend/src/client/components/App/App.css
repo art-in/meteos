@@ -1,3 +1,31 @@
 .root {
-  color: red;
+  outline: 1px dashed red;
+
+  display: grid;
+  height: 100%;
+
+  grid-template-columns: auto minmax(12rem, 56rem) auto;
+  grid-template-rows: auto auto 1fr auto;
+  grid-gap: 1rem;
+  grid-template-areas:
+    '. header .'
+    '. readings .'
+    'chart chart chart'
+    '. footer .';
+}
+
+.header {
+  grid-area: header;
+}
+
+.readings {
+  grid-area: readings;
+}
+
+.chart {
+  grid-area: chart;
+}
+
+.footer {
+  grid-area: footer;
 }

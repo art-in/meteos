@@ -64,7 +64,9 @@ module.exports = {
             '/^(max-|min-)?width/',
             '/^(max-|min-)?height/',
             'background-size',
-            'background-position'
+            'background-position',
+            '/grid-.*/',
+            '/flex-.*/'
           ]
         },
         ignoreMediaFeatureNames: {

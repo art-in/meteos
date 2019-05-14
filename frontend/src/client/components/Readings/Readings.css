@@ -1,0 +1,12 @@
+.root {
+  outline: 1px dashed blue;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.reading {
+  margin: 0.6em;
+}

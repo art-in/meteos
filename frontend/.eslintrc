@@ -8,6 +8,7 @@
         "plugin:prettier/recommended"
     ],
     "plugins": ["react-hooks"],
+    "parser": "babel-eslint",
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module",

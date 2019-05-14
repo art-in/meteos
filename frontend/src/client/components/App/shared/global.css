@@ -1,0 +1,18 @@
+:global(html),
+:global(body) {
+  height: 100%;
+  margin: 0;
+}
+
+:global(body),
+:global(input),
+:global(textarea),
+:global(select),
+:global(button) {
+  font-family: 'montserrat', sans-serif;
+  font-size: 1rem;
+}
+
+:global(#root) {
+  height: 100%;
+}

@@ -1,0 +1,24 @@
+.root {
+  outline: 1px dashed green;
+
+  display: flex;
+  position: relative;
+}
+
+.period-select {
+  position: absolute;
+  z-index: 1;
+  
+  top: 1rem;
+  left: 1rem;
+}
+
+.list {
+  overflow-y: auto;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}

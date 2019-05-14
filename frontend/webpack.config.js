@@ -25,6 +25,7 @@ module.exports = (env, argv) => ({
             loader: 'css-loader',
             options: {
               modules: true,
+              camelCase: true,
               localIdentName: '[name]-[local]'
             }
           },
@@ -32,8 +33,28 @@ module.exports = (env, argv) => ({
             loader: 'postcss-loader'
           }
         ]
+      },
+      {
+        test: /\.(ttf|otf|eot|woff|woff2)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              // add to bundle in form of base64 data url
+              // only if file size is less than limit
+              limit: 8192
+            }
+          }
+        ]
+      },
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack']
       }
     ]
+  },
+  resolve: {
+    modules: [path.resolve(__dirname, 'src/client'), 'node_modules']
   },
   devtool: argv.mode == 'development' ? 'inline-source-map' : false,
   devServer: {
@@ -52,7 +73,7 @@ module.exports = (env, argv) => ({
 
     proxy: {
       // everything except bundle should be served by server
-      ['!bundle.js']: {target: 'http://localhost:3000', secure: false}
+      ['!bundle.js']: {target: 'http://localhost:3001', secure: false}
     },
 
     // watch files in contentBase and reload page on changes.

@@ -1,0 +1,30 @@
+.root {
+  outline: 1px dashed lightblue;
+
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 19rem;
+  max-width: 19rem;
+
+  padding: 0.3em;
+}
+
+.title {
+  color: gray;
+  text-transform: lowercase;
+}
+
+.value-container {
+  text-align: right;
+  font-size: 1.9rem;
+}
+
+.value-suffix {
+  color: gray;
+  margin-left: 0.7em;
+  font-size: 0.9rem;
+  width: 2.5rem;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+}

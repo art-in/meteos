@@ -39,7 +39,7 @@ app.get('/samples', (req, res) => {
         h: Math.floor(humidity),
         p: Math.floor(pressure),
         c: Math.floor(co2),
-        u: time.format()
+        u: time.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
       });
     }
 
