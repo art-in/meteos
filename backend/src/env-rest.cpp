@@ -12,6 +12,8 @@ using web::http::http_request;
 using web::http::methods;
 using web::http::status_codes;
 
+constexpr int DEFAULT_SAMPLES_GET_LIMIT = 1000;
+
 EnvRest::EnvRest(web::uri url, EnvDb &_db, FileLogger logger)
     : Rest{url, logger}, db{_db} {
   reg_handler(methods::GET, "/samples",
@@ -27,26 +29,24 @@ void EnvRest::handle_samples_get(http_request req) {
 
   auto from = query(req, "from");
   auto to = query(req, "to");
+  auto limit = query(req, "limit", DEFAULT_SAMPLES_GET_LIMIT);
 
   samples = db.get_samples(from, to);
-  auto resp = json::value::array();
+  auto samples_json = json::value::array();
 
-  for (int i = 0; i < samples.size(); i++) {
-    auto sample = samples[i];
-    auto datetime = to_string_t(sample.datetime);
-
+  distribute_evenly<Sample>(limit, samples, [&](Sample &sample) {
     auto sample_obj = json::value::object();
 
-    sample_obj[U("u")] = json::value::string(datetime);
+    sample_obj[U("u")] = json::value::string(to_string_t(sample.datetime));
     sample_obj[U("t")] = sample.temperature;
     sample_obj[U("h")] = sample.humidity;
     sample_obj[U("p")] = sample.pressure;
     sample_obj[U("c")] = sample.co2;
 
-    resp[i] = sample_obj;
-  }
+    samples_json[samples_json.size()] = sample_obj;
+  });
 
-  req.reply(status_codes::OK, resp);
+  req.reply(status_codes::OK, samples_json);
 };
 
 void EnvRest::handle_samples_post(http_request req, string_t body) {

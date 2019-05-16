@@ -7,6 +7,7 @@
 #include <string>
 
 #include "file-logger.h"
+#include "sample.h"
 #include "utils.h"
 
 using utility::conversions::to_string_t;
@@ -61,3 +62,53 @@ std::string query(http_request req, std::string key) {
   auto value = web::uri::split_query(query)[k];
   return to_utf8string(value);
 }
+
+int query(web::http::http_request req, std::string key, int defaultVal) {
+  std::string str = query(req, key);
+  return str == "" ? defaultVal : std::stoi(str);
+}
+
+template <class T>
+void distribute_evenly(int n, std::vector<T> target,
+                       std::function<void(T&)> visit) {
+  if (target.empty()) {
+    return;
+  }
+
+  if (n <= 0 || n >= target.size()) {
+    for (auto item : target) {
+      visit(item);
+    }
+    return;
+  }
+
+  if (n == 1) {
+    visit(target[target.size() - 1]);
+    return;
+  }
+
+  if (n == 2) {
+    visit(target[0]);
+    visit(target[target.size() - 1]);
+    return;
+  }
+
+  if (n >= 3) {
+    visit(target[0]);
+
+    int divider = std::ceil(static_cast<float>(target.size() - 1) / (n - 1));
+
+    int visited = 1;
+    for (int i = 1; i < target.size() - 1; i++) {
+      if ((i % divider == 0) || ((target.size() - i) == (n - visited))) {
+        visit(target[i]);
+        visited++;
+      }
+    }
+
+    visit(target[target.size() - 1]);
+  }
+}
+
+template void distribute_evenly<Sample>(int n, std::vector<Sample> target,
+                                        std::function<void(Sample&)> visit);

@@ -39,6 +39,15 @@ SCENARIO("getting samples") {
         REQUIRE(resp.extract_utf8string().get() == "[]");
       }
     }
+
+    WHEN("getting samples with 'limit' query") {
+      auto resp = get(client, "/samples?limit=10");
+
+      THEN("replies with empty array") {
+        REQUIRE(resp.status_code() == status_codes::OK);
+        REQUIRE(resp.extract_utf8string().get() == "[]");
+      }
+    }
   }
 
   GIVEN("one sample") {
@@ -122,12 +131,191 @@ SCENARIO("getting samples") {
 
       resp = get(client, std::string{"/samples?from="} + from + "&to=" + to);
 
-      THEN("replies with samples created between that datetime") {
+      THEN("replies with samples created between that datetimes") {
         auto samples = resp.extract_json().get().as_array();
 
         REQUIRE(samples.size() == 2);
         REQUIRE(samples[0].as_object()[U("t")].as_double() == 1);
         REQUIRE(samples[1].as_object()[U("t")].as_double() == 2);
+      }
+    }
+
+    WHEN("getting samples with 'from', 'to' and 'limit' query") {
+      auto time1 = samples[1].as_object()[U("u")].as_string();
+      auto time2 = samples[2].as_object()[U("u")].as_string();
+
+      auto from = to_utf8string(web::uri::encode_data_string(time1));
+      auto to = to_utf8string(web::uri::encode_data_string(time2));
+
+      resp = get(client, std::string{"/samples?from="} + from + "&to=" + to +
+                             "&limit=1");
+
+      THEN("replies with latest sample created between that datetimes") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 1);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 2);
+      }
+    }
+  }
+
+  GIVEN("ten samples") {
+    post(client, "/samples", R"({"t":0,"h":0,"p":0,"c":0})", JSON);
+    post(client, "/samples", R"({"t":1,"h":1,"p":1,"c":1})", JSON);
+    post(client, "/samples", R"({"t":2,"h":2,"p":2,"c":2})", JSON);
+    post(client, "/samples", R"({"t":3,"h":3,"p":3,"c":3})", JSON);
+    post(client, "/samples", R"({"t":4,"h":4,"p":4,"c":4})", JSON);
+    post(client, "/samples", R"({"t":5,"h":5,"p":5,"c":5})", JSON);
+    post(client, "/samples", R"({"t":6,"h":6,"p":6,"c":6})", JSON);
+    post(client, "/samples", R"({"t":7,"h":7,"p":7,"c":7})", JSON);
+    post(client, "/samples", R"({"t":8,"h":8,"p":8,"c":8})", JSON);
+    post(client, "/samples", R"({"t":9,"h":9,"p":9,"c":9})", JSON);
+
+    WHEN("getting samples without 'limit' query") {
+      auto resp = get(client, "/samples");
+
+      THEN("replies with all samples") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 10);
+      }
+    }
+
+    WHEN("getting samples with 'limit=-1' query") {
+      auto resp = get(client, "/samples?limit=-1");
+
+      THEN("replies with all samples") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 10);
+      }
+    }
+
+    WHEN("getting samples with 'limit=0' query") {
+      auto resp = get(client, "/samples?limit=0");
+
+      THEN("replies with all samples") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 10);
+      }
+    }
+
+    WHEN("getting samples with 'limit=1' query") {
+      auto resp = get(client, "/samples?limit=1");
+
+      THEN("replies with one latest sample") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 1);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=2' query") {
+      auto resp = get(client, "/samples?limit=2");
+
+      THEN("replies with earliest and latest samples") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 2);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 0);
+        REQUIRE(samples[1].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=3' query") {
+      auto resp = get(client, "/samples?limit=3");
+
+      THEN("replies with samples evenly distrubuted by index") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 3);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 0);
+        REQUIRE(samples[1].as_object()[U("t")].as_double() == 5);
+        REQUIRE(samples[2].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=4' query") {
+      auto resp = get(client, "/samples?limit=4");
+
+      THEN("replies with samples evenly distributed") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 4);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 0);
+        REQUIRE(samples[1].as_object()[U("t")].as_double() == 3);
+        REQUIRE(samples[2].as_object()[U("t")].as_double() == 6);
+        REQUIRE(samples[3].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=5' query") {
+      auto resp = get(client, "/samples?limit=5");
+
+      THEN("replies with samples evenly distributed") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 5);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 0);
+        REQUIRE(samples[1].as_object()[U("t")].as_double() == 3);
+        REQUIRE(samples[2].as_object()[U("t")].as_double() == 6);
+        REQUIRE(samples[3].as_object()[U("t")].as_double() == 8);
+        REQUIRE(samples[4].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=6' query") {
+      auto resp = get(client, "/samples?limit=6");
+
+      THEN("replies with samples evenly distributed") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 6);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 0);
+        REQUIRE(samples[1].as_object()[U("t")].as_double() == 2);
+        REQUIRE(samples[2].as_object()[U("t")].as_double() == 4);
+        REQUIRE(samples[3].as_object()[U("t")].as_double() == 6);
+        REQUIRE(samples[4].as_object()[U("t")].as_double() == 8);
+        REQUIRE(samples[5].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=7' query") {
+      auto resp = get(client, "/samples?limit=7");
+
+      THEN("replies with samples evenly distributed") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 7);
+        REQUIRE(samples[0].as_object()[U("t")].as_double() == 0);
+        REQUIRE(samples[1].as_object()[U("t")].as_double() == 2);
+        REQUIRE(samples[2].as_object()[U("t")].as_double() == 4);
+        REQUIRE(samples[3].as_object()[U("t")].as_double() == 6);
+        REQUIRE(samples[4].as_object()[U("t")].as_double() == 7);
+        REQUIRE(samples[5].as_object()[U("t")].as_double() == 8);
+        REQUIRE(samples[6].as_object()[U("t")].as_double() == 9);
+      }
+    }
+
+    WHEN("getting samples with 'limit=10' query") {
+      auto resp = get(client, "/samples?limit=10");
+
+      THEN("replies with all samples") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 10);
+      }
+    }
+
+    WHEN("getting samples with 'limit=20' query") {
+      auto resp = get(client, "/samples?limit=20");
+
+      THEN("replies with all samples") {
+        auto samples = resp.extract_json().get().as_array();
+
+        REQUIRE(samples.size() == 10);
       }
     }
   }
