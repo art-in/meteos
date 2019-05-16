@@ -1,14 +1,27 @@
 import Sample from './Sample';
 import moment from 'moment';
 
-export async function getSamples({from}) {
+export async function getSamples({from, limit}) {
   let url = 'api/samples';
+
+  const queryParams = [];
+
+  if (limit) {
+    queryParams.push(`limit=${limit}`);
+  }
+
   if (from) {
-    url += `?from=${encodeURIComponent(
-      moment(from)
-        .utcOffset(0)
-        .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-    )}`;
+    queryParams.push(
+      `from=${encodeURIComponent(
+        moment(from)
+          .utcOffset(0)
+          .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
+      )}`
+    );
+  }
+
+  if (queryParams.length) {
+    url += '?' + queryParams.join('&');
   }
 
   const response = await fetch(url);

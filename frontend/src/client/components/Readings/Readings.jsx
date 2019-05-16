@@ -1,6 +1,7 @@
 import React from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 
 import Reading from '../Reading';
 import Sample from 'utils/Sample';
@@ -16,8 +17,10 @@ const defaultProps = {
 };
 
 export default function Readings({className, sample}) {
+  const title = sample.time ? moment(sample.time).format('HH:mm:ss') : '';
+
   return (
-    <div className={cn(className, classes.root)}>
+    <div className={cn(className, classes.root)} title={title}>
       <Reading
         className={classes.reading}
         title="Temperature"

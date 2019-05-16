@@ -1,9 +1,13 @@
+import moment from 'moment';
+
 export default class Sample {
   time;
   temperature;
   humidity;
   pressure;
   co2;
+
+  timeMs;
 
   constructor(
     time = null,
@@ -17,5 +21,8 @@ export default class Sample {
     this.humidity = humidity;
     this.pressure = pressure;
     this.co2 = co2;
+
+    // precompute for chart
+    this.timeMs = time ? Number(moment(time)) : null;
   }
 }
