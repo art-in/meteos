@@ -1,6 +1,6 @@
 Meteos Frontend.
 
-Client-server web app which fetches environment data from Backend and shows it in browser.
+Client-server web app that fetches environment data from Backend and shows it in browser.
 
 ---
 
