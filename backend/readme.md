@@ -37,7 +37,7 @@ Prerequisites: (1) [docker](https://www.docker.com/).
 ```
 # download image from docker hub and run it (set port and folder path to save database in)
 docker run -di \
-    -p <port>:8080 \
+    -p <port>:3000 \
     --mount type=bind,src=<database folder path>,dst=/opt/project/build/bin/data/ \
     artinphares/meteos-backend
 ```
