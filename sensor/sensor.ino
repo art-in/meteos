@@ -62,57 +62,78 @@ int display_reading_idx = 0;
 
 Button display_btn{PIN_BUTTON_DISPLAY};
 
+void log(String str, bool to_display = false) {
+  Serial.print(str);
+
+  if (to_display) {
+    display.clearBuffer();
+    display.setFontPosTop();
+
+    display.setFont(u8g2_font_5x7_mf);
+    // randomize y-position to avoid OLED pixels burnout.
+    display.drawStr(0, random(59), str.c_str());
+    display.sendBuffer();
+  }
+}
+
+void log_ln(String str, bool to_display = false) {
+  log(str + "\n", to_display);
+}
+
 class ServerCallbacks : public BLEServerCallbacks {
-  void onConnect(BLEServer *pServer) { Serial.println("Client connected."); };
+  void onConnect(BLEServer *pServer) { log_ln("BT: client connected.", true); };
 
   void onDisconnect(BLEServer *pServer) {
-    Serial.println("Client disconnected.");
+    log_ln("BT: client disconnected.", true);
   }
 };
 
 class SSIDCharacteristicCallbacks : public BLECharacteristicCallbacks {
   void onRead(BLECharacteristic *pCharacteristic) {
-    Serial.print("BT: SSID reading... ");
-    Serial.println(pCharacteristic->getValue().c_str());
-    Serial.println("BT: SSID read.");
+    log("BT: SSID reading... ");
+    log_ln(pCharacteristic->getValue().c_str());
+    log_ln("BT: SSID read.");
   }
 
   void onWrite(BLECharacteristic *pCharacteristic) {
-    Serial.print("BT: SSID written: ");
+    log("BT: SSID written: ");
     ssid = pCharacteristic->getValue();
     preferences.putString("ssid", ssid.c_str());
-    Serial.println(ssid.c_str());
+    log_ln(ssid.c_str());
   }
 };
 
 class PassCharacteristicCallbacks : public BLECharacteristicCallbacks {
   void onRead(BLECharacteristic *pCharacteristic) {
-    Serial.print("Pass read: ");
-    Serial.println(pCharacteristic->getValue().c_str());
+    log("Pass read: ");
+    log_ln(pCharacteristic->getValue().c_str());
   }
 
   void onWrite(BLECharacteristic *pCharacteristic) {
-    Serial.print("Pass written: ");
+    log("Pass written: ");
     pass = pCharacteristic->getValue();
     preferences.putString("pass", pass.c_str());
-    Serial.println(pass.c_str());
+    log_ln(pass.c_str());
   }
 };
 
 void setup() {
   Serial.begin(115200);
 
+  log_ln("Reading preferences...", true);
   preferences.begin("meteos", false);
 
   ssid = preferences.getString("ssid", "").c_str();
   pass = preferences.getString("pass", "").c_str();
 
-  Serial.print("SSID: ");
-  Serial.println(ssid.c_str());
-  Serial.print("Pass: ");
-  Serial.println(pass.c_str());
+  log("SSID: ");
+  log_ln(ssid.c_str());
+  log("Pass: ");
+  log_ln(pass.c_str());
+  log_ln("Reading preferences...done", true);
 
   // init button
+  log_ln("Init button...", true);
   display_btn.on_state_changed = [](ButtonState btn_state) {
     if (btn_state == ButtonState::ON) {
       if (is_display_on) {
@@ -130,12 +151,16 @@ void setup() {
       display_on_time = millis();
     }
   };
+  log_ln("Init button...done", true);
 
   // init display
+  log_ln("init display...", true);
   display.begin();
   display.setContrast(255);
+  log_ln("init display...done", true);
 
   // init bluetooth
+  log_ln("init bluetooth...", true);
   BLEDevice::init("Meteos Sensor");
   BLEServer *pServer = BLEDevice::createServer();
 
@@ -165,31 +190,35 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
-  Serial.println("Waiting for ssid/pass configuration.");
+  log_ln("Waiting for ssid/pass configuration...", true);
   while (ssid.empty() || pass.empty()) {
     delay(1000);
   }
-  Serial.println("SSID/pass configured");
+  log_ln("Waiting for ssid/pass configuration...done", true);
+  log_ln("init bluetooth...done", true);
 
   // init wifi
-  Serial.print("Connecting to ");
-  Serial.println(ssid.c_str());
+  log_ln("init wifi...", true);
+  log("Connecting to ");
+  log_ln(ssid.c_str());
 
   WiFi.begin(ssid.c_str(), pass.c_str());
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    log(".");
   }
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  log_ln("");
+  log_ln("WiFi connected");
+  log_ln("IP address: ");
+  log_ln(WiFi.localIP().toString());
+  log_ln("init wifi...done", true);
 
   // init BME280
+  log_ln("init bme280...", true);
   if (!bme.begin(&Wire)) {
-    Serial.println("Could not find BME280 sensor.");
+    log_ln("Could not find BME280 sensor.");
     while (1)
       ;
   }
@@ -201,8 +230,10 @@ void setup() {
                   Adafruit_BME280::SAMPLING_X1,  // pressure
                   Adafruit_BME280::SAMPLING_X1,  // humidity
                   Adafruit_BME280::FILTER_OFF);
+  log_ln("init bme280...done", true);
 
   // init MHZ19
+  log_ln("init mhz19...", true);
   mhz_serial.begin(MHZ_BAUDRATE);
 
   // mhz.printCommunication(false, true);
@@ -216,27 +247,33 @@ void setup() {
     int co2 = mhz.getCO2(false, true);
 
     if (mhz.errorCode == RESULT_FILTER) {
-      Serial.println("mhz: ... warming up ...");
+      log_ln("mhz: ... warming up ...", true);
     } else if (mhz.errorCode != RESULT_OK) {
-      Serial.println("mhz: failed to read co2 on warmup.");
+      log_ln("mhz: failed to read co2 on warmup.", true);
     } else {
-      Serial.println("mhz: warmed up!");
+      log_ln("mhz: warmed up!", true);
       break;
     }
 
     delay(CO2_WARMING_READ_PERIOD_MS);
   }
+  log_ln("init mhz19...done", true);
 }
+
+unsigned int posted_samples_count;
 
 void loop() {
   auto now = millis();
   if (!last_sample_time || (now - last_sample_time >= SAMPLE_DELAY)) {
+    log_ln("posting sample...", true);
     last_sample_time = now;
 
     last_sample = takeSample();
 
     // printSample(last_sample);
     postSample(last_sample);
+    posted_samples_count++;
+    log_ln("posting sample...done " + String(posted_samples_count), true);
   }
 
   if (is_display_on) {
@@ -268,37 +305,37 @@ Sample takeSample() {
   s.co2 = mhz.getCO2(false, true);
 
   if (mhz.errorCode != RESULT_OK) {
-    Serial.println("mhz: failed to receive co2. error: " + mhz.errorCode);
+    log_ln("mhz: failed to receive co2. error: " + mhz.errorCode, true);
   }
 
   return s;
 }
 
 void printSample(const Sample &s) {
-  Serial.println("---");
+  log_ln("---");
 
-  Serial.print("Temperature = ");
-  Serial.print(s.temperature);
-  Serial.println(" *C");
+  log("Temperature = ");
+  log(s.temperature);
+  log_ln(" *C");
 
-  Serial.print("Humidity = ");
-  Serial.print(s.humidity);
-  Serial.println(" %");
+  log("Humidity = ");
+  log(s.humidity);
+  log_ln(" %");
 
-  Serial.print("Pressure = ");
-  Serial.print(s.pressure);
-  Serial.println(" mm hg");
+  log("Pressure = ");
+  log(s.pressure);
+  log_ln(" mm hg");
 
-  Serial.print("CO2 = ");
-  Serial.print(s.co2);
-  Serial.println(" ppx");
+  log("CO2 = ");
+  log(s.co2);
+  log_ln(" ppx");
 }
 
 void postSample(const Sample &s) {
   WiFiClient client;
 
   if (!client.connect(host, port)) {
-    Serial.println("wifi error: client connection failed");
+    log_ln("wifi error: client connection failed", true);
     return;
   }
 
@@ -310,16 +347,16 @@ void postSample(const Sample &s) {
              port + "\r\n" + "Content-Type: application/json\r\n" +
              "Content-Length: " + json.length() + "\r\n" + "\r\n" + json;
 
-  // Serial.println("---");
-  // Serial.print(msg);
-  // Serial.println("---");
+  // log_ln("---");
+  // log(msg);
+  // log_ln("---");
 
   client.print(msg);
 
   unsigned long timeout = millis();
   while (client.available() == 0) {
     if (millis() - timeout > 1000) {
-      Serial.println("wifi error: client timeout");
+      log_ln("wifi error: client timeout", true);
       client.stop();
       return;
     }
@@ -329,7 +366,7 @@ void postSample(const Sample &s) {
   // NOTE: Blocks button state read.
   // while (client.available()) {
   //   String line = client.readStringUntil('\r');
-  //   Serial.print(line);
+  //   log(line);
   // }
 
   client.stop();
