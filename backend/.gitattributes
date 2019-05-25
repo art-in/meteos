@@ -1,2 +1,2 @@
 # files to ignore in github lang stats
-src/libs/* linguist-vendored
+include/* linguist-vendored
