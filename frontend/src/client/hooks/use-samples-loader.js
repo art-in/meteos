@@ -29,7 +29,11 @@ export default function useSamplesLoader(period) {
 
       // only load full period once, then start from latest loaded sample
       let from;
-      if (loadedSamples.length && !isCleanReload) {
+      if (
+        prevLatestSample &&
+        periodStart.isBefore(prevLatestSample.time) &&
+        !isCleanReload
+      ) {
         from = moment(prevLatestSample.time).add(1, 'ms');
       } else {
         from = periodStart;
