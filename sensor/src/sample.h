@@ -1,3 +1,5 @@
+#pragma once
+
 struct Sample {
   float temperature;
   float humidity;

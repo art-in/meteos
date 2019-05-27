@@ -1,0 +1,9 @@
+#include <Arduino.h>
+
+RTC_DATA_ATTR extern uint64_t timings_next_sample_time_us;
+RTC_DATA_ATTR extern uint64_t timings_next_display_clear_time_us;
+RTC_DATA_ATTR extern uint64_t timings_next_wakeup_time_us;
+RTC_DATA_ATTR extern int timings_wakeup_timer_mistake_us;
+
+RTC_DATA_ATTR extern uint64_t timings_from_boot_to_display_clear_duration_us;
+RTC_DATA_ATTR extern uint64_t timings_from_boot_to_sample_duration_us;

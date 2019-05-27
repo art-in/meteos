@@ -1,5 +1,5 @@
 .vscode
-.bin
+.build
 
 # TODO
 bt_client
