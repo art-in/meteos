@@ -1,71 +1,97 @@
 #include <Arduino.h>
+#include <chrono>
 #include <functional>
 
+#include "src/button.h"
 #include "src/config.h"
 #include "src/display.h"
 #include "src/radio-bt.h"
 #include "src/radio-wifi.h"
 #include "src/sample.h"
 #include "src/sensors.h"
-#include "src/sleep.h"
 #include "src/utils.h"
+
+constexpr auto SAMPLE_DELAY_US = std::chrono::milliseconds{10000};
+constexpr auto DISPLAY_DELAY_US = std::chrono::milliseconds{5000};
+constexpr int PIN_BUTTON = 15;
+
+Display display;
+Config config;
+Sensors sensors;
+Button btn;
+RadioBT bt{config};
+RadioWiFi wifi;
+
+std::chrono::milliseconds latest_sample_time;
+std::chrono::milliseconds latest_display_reading_time;
 
 void setup() {
   Serial.begin(115200);
+  log_ln("main: setup.");
 
-  Sleep sleep;
-  auto wakeup_reason = sleep.on_wakeup();
+  display.init();
+  display.draw_logo();
 
-  bool is_wakeup_by_button = wakeup_reason == ESP_SLEEP_WAKEUP_EXT1;
-  bool is_wakeup_by_timer = wakeup_reason == ESP_SLEEP_WAKEUP_TIMER;
-  bool is_initial_boot = !is_wakeup_by_button && !is_wakeup_by_timer;
-
-  Display display;
-  Sensors sensors;
-  Config config;
   config.init();
+  sensors.init();
+  bt.init();
+  btn.init(PIN_BUTTON, on_button_state_changed);
 
-  if (is_initial_boot) {
-    // use initial boot as only time to update wifi config
-    config.clear();
+  // use initial boot as only time to update wifi config
+  // TODO: add config mode (long button press)
+  // config.clear();
 
-    // TODO: show draw logo
-    log_ln("main: initial boot.", true);
-    delay(1000);
+  if (!config.has_wifi_config()) {
+    bt.start_advertising();
 
-    if (!config.has_wifi_config()) {
-      RadioBT bt{config};
-      bt.start_advertising();
+    config.wait_wifi_config([]() { display.draw_wait_config(); });
+    display.clear();
 
-      config.wait_wifi_config([&display]() { display.draw_wait_config(); });
-      display.clear();
-    }
-
-  } else if (is_wakeup_by_button) {
-    auto last_sample = Sensors::get_last_sample();
-    display.draw_next_reading(last_sample);
-
-  } else if (is_wakeup_by_timer) {
-    if (Sleep::is_wakeup_goal_make_sample()) {
-      // wakeup goal - make sample
-
-      sensors.init(is_initial_boot);
-      auto sample = sensors.take_sample();
-
-      RadioWiFi wifi{config.wifi_ssid, config.wifi_pass};
-      if (wifi.connect()) {
-        wifi.post_sample(sample);
-      }
-    } else {
-      // wakeup goal - clear display
-      display.clear();
-    }
+    bt.stop_advertising();
   }
 
-  // sleep
-  sleep.plan_deep_sleep();
+  wifi.connect(config.wifi_ssid(), config.wifi_pass());
+
+  // delay logo
+  delay(1000);
+  display.clear();
 }
 
 void loop() {
-  // never happens
+  auto now = time();
+
+  loop_sample(now);
+  loop_display(now);
+  btn.update();
+
+  delay(10);
+}
+
+void loop_sample(const std::chrono::milliseconds now) {
+  if (now - latest_sample_time < SAMPLE_DELAY_US) {
+    return;
+  }
+
+  latest_sample_time = now;
+
+  auto sample = sensors.take_sample();
+  wifi.post_sample(sample);
+}
+
+void loop_display(const std::chrono::milliseconds now) {
+  if (!display.is_on() ||
+      (now - latest_display_reading_time < DISPLAY_DELAY_US)) {
+    return;
+  }
+
+  display.clear();
+}
+
+void on_button_state_changed(ButtonState state) {
+  if (state == ButtonState::PRESSED) {
+    latest_display_reading_time = time();
+
+    auto latest_sample = sensors.get_latest_sample();
+    display.draw_next_reading(latest_sample);
+  }
 }

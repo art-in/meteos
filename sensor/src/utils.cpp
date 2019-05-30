@@ -20,10 +20,14 @@ void log(uint64_t num) {
 
 void log_ln(String str, bool to_display) { log(str + "\n", to_display); }
 
-uint64_t get_epoch_time_us() {
-  timeval time;
-  timezone tz;
-  gettimeofday(&time, &tz);
-  return static_cast<uint64_t>(time.tv_sec) * uS_TO_S_FACTOR +
-         static_cast<uint64_t>(time.tv_usec);
+void log(long long num) {
+  long long xx = num / 1000000000ULL;
+  if (xx > 0) Serial.print((long)xx);
+  Serial.println((long)(num - xx * 1000000000));
+}
+
+std::chrono::milliseconds time() {
+  const auto p1 = std::chrono::system_clock::now();
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+      p1.time_since_epoch());
 }

@@ -1,37 +1,57 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
+#include <chrono>
 
 #include "radio-wifi.h"
 #include "utils.h"
+
+constexpr auto CONNECT_TIMEOUT = std::chrono::milliseconds{5000};
 
 // TODO: move to config
 const char* host = "192.168.1.100";
 constexpr int port = 3300;
 
-constexpr int CONNECT_TIMEOUT = 5000;
+bool RadioWiFi::connect() { return connect(ssid_, pass_); }
 
-bool RadioWiFi::connect() {
+bool RadioWiFi::connect(std::string ssid, std::string pass) {
   log_ln("wifi: connect...", true);
   auto before_ms = millis();
 
-  log("wifi: connecting to ");
-  log(ssid.c_str());
+  if (WiFi.status() == WL_CONNECTED && ssid == ssid_ && pass == pass_) {
+    log_ln("wifi: already connected. skipping", true);
+  } else {
+    log("wifi: connecting to ");
+    log(ssid.c_str());
 
-  WiFi.begin(ssid.c_str(), pass.c_str());
+    WiFi.begin(ssid.c_str(), pass.c_str());
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-    log(".");
+    auto start = time();
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(100);
+      log(".");
 
-    if (millis() - before_ms > CONNECT_TIMEOUT) {
-      log_ln("");
-      log_ln("wifi: error: connect timeout");
-      return false;
+      if (time() - start > CONNECT_TIMEOUT) {
+        log_ln("");
+        log_ln("wifi: error: connect timeout");
+        return false;
+      }
+    }
+    log_ln("");
+    log_ln("wifi: local IP: " + WiFi.localIP().toString());
+
+    ssid_ = ssid;
+    pass_ = pass;
+
+    int res;
+    if ((res = esp_wifi_set_ps(WIFI_PS_MAX_MODEM)) == ESP_OK) {
+      log_ln("wifi: set wifi power save mode");
+    } else {
+      log("wifi: error: failed to set wifi power save mode: ");
+      log_ln(String(res));
     }
   }
 
-  log_ln("");
-  log_ln("wifi: IP address: " + WiFi.localIP().toString());
   log_ln("wifi: connect...done in " + String(millis() - before_ms) + "ms",
          true);
   return true;
@@ -40,6 +60,10 @@ bool RadioWiFi::connect() {
 void RadioWiFi::post_sample(const Sample& s) {
   log_ln("wifi: posting sample...");
   auto before_ms = millis();
+
+  if (WiFi.status() != WL_CONNECTED) {
+    connect();
+  }
 
   WiFiClient client;
 
@@ -56,10 +80,6 @@ void RadioWiFi::post_sample(const Sample& s) {
              port + "\r\n" + "Content-Type: application/json\r\n" +
              "Content-Length: " + json.length() + "\r\n" + "\r\n" + json;
 
-  // log_ln("---");
-  // log(msg);
-  // log_ln("---");
-
   client.print(msg);
 
   unsigned long timeout = millis();
@@ -70,13 +90,6 @@ void RadioWiFi::post_sample(const Sample& s) {
       return;
     }
   }
-
-  // Read all the lines of the reply from server and print them to Serial
-  // NOTE: Blocks button state read.
-  // while (client.available()) {
-  //   String line = client.readStringUntil('\r');
-  //   log(line);
-  // }
 
   client.stop();
 

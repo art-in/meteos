@@ -1,44 +1,42 @@
 #include <Arduino.h>
+#include <chrono>
 
 #include "sensors.h"
-#include "timings.h"
 #include "utils.h"
 
-constexpr unsigned long SAMPLE_DELAY_US = 10000000;  // us
+constexpr int MHZ_BAUDRATE = 9600;
+constexpr double PASCAL_TO_MECURY_MM = 0.00750062;
+constexpr auto CO2_WARMING_READ_PERIOD = std::chrono::milliseconds{30000};
 
-RTC_DATA_ATTR Sample last_sample;
-
-void Sensors::init(bool is_initial_boot) {
-  init_bme(is_initial_boot);
-  init_mhz(is_initial_boot);
+void Sensors::init() {
+  init_bme();
+  init_mhz();
 }
 
-void Sensors::init_bme(bool is_initial_boot) {
+void Sensors::init_bme() {
   log_ln("sensors: bme: init...", true);
   auto before_ms = millis();
 
   if (!bme.begin(&Wire)) {
-    log_ln("sensors: bme: could not find BME280 sensor.");
+    log_ln("sensors: bme: error: could not find BME280 sensor.");
     while (1)
       ;
   }
 
-  if (is_initial_boot) {
-    // weather monitoring
-    // suggested rate is 1/60Hz (1m)
-    log_ln("sensors: bme: set sampling config", true);
-    bme.setSampling(Adafruit_BME280::MODE_FORCED,
-                    Adafruit_BME280::SAMPLING_X1,  // temperature
-                    Adafruit_BME280::SAMPLING_X1,  // pressure
-                    Adafruit_BME280::SAMPLING_X1,  // humidity
-                    Adafruit_BME280::FILTER_OFF);
-  }
+  // weather monitoring
+  // suggested rate is 1/60Hz (1m)
+  log_ln("sensors: bme: set sampling config", true);
+  bme.setSampling(Adafruit_BME280::MODE_FORCED,
+                  Adafruit_BME280::SAMPLING_X1,  // temperature
+                  Adafruit_BME280::SAMPLING_X1,  // pressure
+                  Adafruit_BME280::SAMPLING_X1,  // humidity
+                  Adafruit_BME280::FILTER_OFF);
 
   log_ln("sensors: bme: init...done in " + String(millis() - before_ms) + "ms",
          true);
 }
 
-void Sensors::init_mhz(bool is_initial_boot) {
+void Sensors::init_mhz() {
   log_ln("sensors: mhz: init...", true);
   auto before_ms = millis();
 
@@ -48,27 +46,25 @@ void Sensors::init_mhz(bool is_initial_boot) {
   mhz.begin(mhz_serial);
   mhz.setFilter();
 
-  if (is_initial_boot) {
-    mhz.setRange(2000);
-    mhz.autoCalibration(true);
+  mhz.setRange(2000);
+  mhz.autoCalibration(true);
 
-    log_ln("sensors: mhz: warming up...", true);
-    while (true) {
-      int co2 = mhz.getCO2(false, true);
+  log_ln("sensors: mhz: warming up...", true);
+  while (true) {
+    int co2 = mhz.getCO2(false, true);
 
-      if (mhz.errorCode == RESULT_FILTER) {
-        log_ln("sensors: mhz: warming up...", true);
-      } else if (mhz.errorCode != RESULT_OK) {
-        log_ln("sensors: mhz: failed to read CO2 on warmup.", true);
-      } else {
-        log_ln("sensors: mhz: warmed up!", true);
-        break;
-      }
-
-      delay(CO2_WARMING_READ_PERIOD_MS);
+    if (mhz.errorCode == RESULT_FILTER) {
+      log_ln("sensors: mhz: warming up...", true);
+    } else if (mhz.errorCode != RESULT_OK) {
+      log_ln("sensors: mhz: failed to read CO2 on warmup.", true);
+    } else {
+      log_ln("sensors: mhz: warmed up!", true);
+      break;
     }
-    log_ln("sensors: mhz: warming up...done", true);
+
+    delay(CO2_WARMING_READ_PERIOD.count());
   }
+  log_ln("sensors: mhz: warming up...done", true);
 
   log_ln("sensors: mhz: init...done in " + String(millis() - before_ms) + "ms",
          true);
@@ -77,15 +73,6 @@ void Sensors::init_mhz(bool is_initial_boot) {
 Sample Sensors::take_sample() {
   log_ln("sensors: taking sample...", true);
   auto before_ms = millis();
-
-  if (timings_next_sample_time_us) {
-    int mistake_us = get_epoch_time_us() - timings_next_sample_time_us;
-    log_ln("sensors: take sample time mistake: " +
-           String(mistake_us / uS_TO_MS_FACTOR) + "ms");
-  }
-
-  timings_from_boot_to_sample_duration_us = millis() * uS_TO_MS_FACTOR;
-  timings_next_sample_time_us = get_epoch_time_us() + SAMPLE_DELAY_US;
 
   Sample s;
 
@@ -102,7 +89,7 @@ Sample Sensors::take_sample() {
            true);
   }
 
-  last_sample = s;
+  latest_sample = s;
 
   log_ln(
       "sensors: taking sample...done in " + String(millis() - before_ms) + "ms",
@@ -110,4 +97,4 @@ Sample Sensors::take_sample() {
   return s;
 }
 
-Sample Sensors::get_last_sample() { return last_sample; }
+Sample Sensors::get_latest_sample() { return latest_sample; }

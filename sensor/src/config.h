@@ -6,14 +6,13 @@
 
 class Config {
  public:
-  Config();
   void init();
 
-  std::string wifi_ssid;
-  std::string wifi_pass;
+  std::string wifi_ssid() const;
+  void wifi_ssid(std::string);
 
-  void set_wifi_ssid(std::string);
-  void set_wifi_pass(std::string);
+  std::string wifi_pass() const;
+  void wifi_pass(std::string);
 
   bool has_wifi_config();
   void wait_wifi_config(std::function<void()> step);
@@ -22,4 +21,7 @@ class Config {
 
  private:
   Preferences preferences;
+
+  std::string wifi_ssid_;
+  std::string wifi_pass_;
 };

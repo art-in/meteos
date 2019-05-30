@@ -5,13 +5,13 @@
 
 class RadioWiFi {
  public:
-  RadioWiFi(std::string _ssid, std::string _pass) : ssid{_ssid}, pass{_pass} {};
-
+  bool connect(std::string ssid, std::string pass);
   bool connect();
-  void post_sample(const Sample &s);
   static void disconnect();
 
+  void post_sample(const Sample &s);
+
  private:
-  std::string ssid;
-  std::string pass;
+  std::string ssid_;
+  std::string pass_;
 };
