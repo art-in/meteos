@@ -15,3 +15,5 @@ Build
     - CPU Frequency: "80MHz(WiFi/BT)"
 1. Connect ESP32 to computer over USB
 1. Compile / Upload
+
+Notes: tested with Arduino IDE v1.8.9, ESP32 core v1.0.2, all libraries added to `src/libs`.
