@@ -44,21 +44,25 @@ void Sensors::init_mhz() {
 
   // mhz.printCommunication(false, true);
   mhz.begin(mhz_serial);
-  mhz.setFilter();
+  mhz.setFilter(true, true);
 
   mhz.setRange(2000);
   mhz.autoCalibration(true);
 
   log_ln("sensors: mhz: warming up...", true);
   while (true) {
-    int co2 = mhz.getCO2(false, true);
+    int co2 = mhz.getCO2(true, true);
 
     if (mhz.errorCode == RESULT_FILTER) {
       log_ln("sensors: mhz: warming up...", true);
     } else if (mhz.errorCode != RESULT_OK) {
       log_ln("sensors: mhz: failed to read CO2 on warmup.", true);
+    } else if (co2 == 0) {
+      // TODO: remove when zero co2 is filtered
+      // https://github.com/WifWaf/MH-Z19/issues/6
+      log_ln("sensors: mhz: received zero, continuing warmup...", true);
     } else {
-      log_ln("sensors: mhz: warmed up!", true);
+      // warmed up
       break;
     }
 
@@ -82,10 +86,10 @@ Sample Sensors::take_sample() {
   s.humidity = bme.readHumidity();
   s.pressure = bme.readPressure() * PASCAL_TO_MECURY_MM;
 
-  s.co2 = mhz.getCO2(false, true);
+  s.co2 = mhz.getCO2(true, true);
 
   if (mhz.errorCode != RESULT_OK) {
-    log_ln("sensors: mhz: failed to receive CO2. error: " + mhz.errorCode,
+    log_ln("sensors: mhz: failed to read CO2. error: " + String(mhz.errorCode),
            true);
   }
 
