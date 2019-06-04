@@ -14,69 +14,61 @@ void Sensors::init() {
 }
 
 void Sensors::init_bme() {
-  log_ln("sensors: bme: init...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("sensors: bme: init");
 
   if (!bme.begin(&Wire)) {
-    log_ln("sensors: bme: error: could not find BME280 sensor.");
+    METEOS_LOG_LN("sensors: bme: error: could not find BME280 sensor.");
     while (1)
       ;
   }
 
   // weather monitoring
   // suggested rate is 1/60Hz (1m)
-  log_ln("sensors: bme: set sampling config", true);
+  METEOS_LOG_LN("sensors: bme: set sampling config");
   bme.setSampling(Adafruit_BME280::MODE_FORCED,
                   Adafruit_BME280::SAMPLING_X1,  // temperature
                   Adafruit_BME280::SAMPLING_X1,  // pressure
                   Adafruit_BME280::SAMPLING_X1,  // humidity
                   Adafruit_BME280::FILTER_OFF);
-
-  log_ln("sensors: bme: init...done in " + String(millis() - before_ms) + "ms",
-         true);
 }
 
 void Sensors::init_mhz() {
-  log_ln("sensors: mhz: init...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("sensors: mhz: init");
 
   mhz_serial.begin(MHZ_BAUDRATE);
 
-  // mhz.printCommunication(false, true);
   mhz.begin(mhz_serial);
   mhz.setFilter(true, true);
 
   mhz.setRange(2000);
   mhz.autoCalibration(true);
 
-  log_ln("sensors: mhz: warming up...", true);
-  while (true) {
-    int co2 = mhz.getCO2(true, true);
+  {
+    METEOS_SCOPED_LOGGER("sensors: mhz: warmup");
+    while (true) {
+      int co2 = mhz.getCO2(true, true);
 
-    if (mhz.errorCode == RESULT_FILTER) {
-      log_ln("sensors: mhz: warming up...", true);
-    } else if (mhz.errorCode != RESULT_OK) {
-      log_ln("sensors: mhz: failed to read CO2 on warmup.", true);
-    } else if (co2 == 0) {
-      // TODO: remove when zero co2 is filtered
-      // https://github.com/WifWaf/MH-Z19/issues/6
-      log_ln("sensors: mhz: received zero, continuing warmup...", true);
-    } else {
-      // warmed up
-      break;
+      if (mhz.errorCode == RESULT_FILTER) {
+        METEOS_LOG_LN("sensors: mhz: warming up...");
+      } else if (mhz.errorCode != RESULT_OK) {
+        METEOS_LOG_LN("sensors: mhz: failed to read CO2 on warmup.");
+        return;
+      } else if (co2 == 0) {
+        // TODO: remove when zero co2 is filtered
+        // https://github.com/WifWaf/MH-Z19/issues/6
+        METEOS_LOG_LN("sensors: mhz: received zero, continuing warmup...");
+      } else {
+        // warmed up
+        break;
+      }
+
+      delay(CO2_WARMING_READ_PERIOD.count());
     }
-
-    delay(CO2_WARMING_READ_PERIOD.count());
   }
-  log_ln("sensors: mhz: warming up...done", true);
-
-  log_ln("sensors: mhz: init...done in " + String(millis() - before_ms) + "ms",
-         true);
 }
 
 Sample Sensors::take_sample() {
-  log_ln("sensors: taking sample...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("sensors: take sample");
 
   Sample s;
 
@@ -89,15 +81,11 @@ Sample Sensors::take_sample() {
   s.co2 = mhz.getCO2(true, true);
 
   if (mhz.errorCode != RESULT_OK) {
-    log_ln("sensors: mhz: failed to read CO2. error: " + String(mhz.errorCode),
-           true);
+    METEOS_LOG_LN("sensors: mhz: failed to read CO2. error: " +
+                  String(mhz.errorCode));
   }
 
   latest_sample = s;
-
-  log_ln(
-      "sensors: taking sample...done in " + String(millis() - before_ms) + "ms",
-      true);
   return s;
 }
 

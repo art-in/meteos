@@ -6,21 +6,16 @@ Display* Display::instance = nullptr;
 Display::Display() : display{U8G2_R0} { Display::instance = this; }
 
 void Display::init() {
-  log_ln("display: init...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("display: init");
 
   display.begin();
   display.setContrast(255);
-
-  log_ln("display: init...done in " + String(millis() - before_ms) + "ms",
-         true);
 }
 
 bool Display::is_on() { return is_on_; }
 
 void Display::draw_logo() {
-  log_ln("display: draw logo...");
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("display: draw logo");
 
   display.clearBuffer();
   display.setFontPosTop();
@@ -29,13 +24,10 @@ void Display::draw_logo() {
   display.drawStr(15, 20, "meteos");
 
   display.sendBuffer();
-
-  log_ln("display: draw logo...done in " + String(millis() - before_ms) + "ms");
 }
 
 void Display::draw_next_reading(const Sample& sample) {
-  log_ln("display: draw next reading...");
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("display: draw next reading");
 
   if (is_on_) {
     sample_reading_idx++;
@@ -93,22 +85,18 @@ void Display::draw_next_reading(const Sample& sample) {
 
     display.sendBuffer();
   }
-
-  log_ln("display: draw next reading...done in " +
-         String(millis() - before_ms) + "ms");
 }
 
 void Display::draw_wait_config() {
-  log_ln("display: draw wait config...");
+  METEOS_SCOPED_LOGGER("display: draw wait config");
 
   display.clearBuffer();
   display.setFontPosTop();
 
   display.setFont(u8g2_font_t0_11_mf);
-  display.drawStr(0, random(45), "waiting config...");
+  display.drawStr(0, random(45), "waiting config");
 
   display.sendBuffer();
-  log_ln("display: draw wait config...done");
 }
 
 void Display::draw_log(String str) {
@@ -128,5 +116,5 @@ void Display::clear() {
   display.clearBuffer();
   display.sendBuffer();
 
-  log_ln("display: cleared", true);
+  METEOS_LOG_LN("display: cleared");
 }

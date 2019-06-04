@@ -15,8 +15,7 @@ constexpr int port = 3300;
 bool RadioWiFi::connect() { return connect(ssid_, pass_); }
 
 bool RadioWiFi::connect(std::string ssid, std::string pass) {
-  log_ln("wifi: connect...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("wifi: connect");
 
   ssid_ = ssid;
   pass_ = pass;
@@ -26,14 +25,14 @@ bool RadioWiFi::connect(std::string ssid, std::string pass) {
   if ((latest_connect_attempt_time.count()) &&
       (now - latest_connect_attempt_time < RECONNECT_DELAY)) {
     // in case AP is unavailable do not try to connect too often to save power.
-    log_ln("wifi: skipping connect per delay");
+    METEOS_LOG_LN("wifi: skipping connect per delay");
     return false;
   }
 
   latest_connect_attempt_time = now;
 
-  log("wifi: connecting to ");
-  log(ssid.c_str());
+  METEOS_LOG("wifi: connecting to ");
+  METEOS_LOG(ssid.c_str());
 
   WiFi.begin(ssid.c_str(), pass.c_str());
 
@@ -41,45 +40,42 @@ bool RadioWiFi::connect(std::string ssid, std::string pass) {
   wl_status_t status;
   while ((status = WiFi.status()) != WL_CONNECTED) {
     if (status == wl_status_t::WL_NO_SSID_AVAIL) {
-      log_ln("");
-      log_ln("wifi: error: AP with specified SSID is not available");
+      METEOS_LOG_LN("");
+      METEOS_LOG_LN("wifi: error: AP with specified SSID is not available");
       return false;
     }
 
     if (status == wl_status_t::WL_CONNECT_FAILED) {
-      log_ln("");
-      log_ln("wifi: error: connect failed");
+      METEOS_LOG_LN("");
+      METEOS_LOG_LN("wifi: error: connect failed");
       return false;
     }
 
     if (time() - start > CONNECT_TIMEOUT) {
-      log_ln("");
-      log_ln("wifi: error: connect timeout");
+      METEOS_LOG_LN("");
+      METEOS_LOG_LN("wifi: error: connect timeout");
       return false;
     }
 
-    log(".");
+    METEOS_LOG(".");
     delay(100);
   }
-  log_ln("");
-  log_ln("wifi: local IP: " + WiFi.localIP().toString());
+  METEOS_LOG_LN("");
+  METEOS_LOG_LN("wifi: local IP: " + WiFi.localIP().toString());
 
   int res;
   if ((res = esp_wifi_set_ps(WIFI_PS_MAX_MODEM)) == ESP_OK) {
-    log_ln("wifi: set wifi power save mode");
+    METEOS_LOG_LN("wifi: set wifi power save mode");
   } else {
-    log("wifi: error: failed to set wifi power save mode: ");
-    log_ln(String(res));
+    METEOS_LOG("wifi: error: failed to set wifi power save mode: ");
+    METEOS_LOG_LN(String(res));
   }
 
-  log_ln("wifi: connect...done in " + String(millis() - before_ms) + "ms",
-         true);
   return true;
 }
 
 void RadioWiFi::post_sample(const Sample& s) {
-  log_ln("wifi: posting sample...");
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("wifi: post sample");
 
   if (WiFi.status() != WL_CONNECTED && !connect()) {
     return;
@@ -88,7 +84,7 @@ void RadioWiFi::post_sample(const Sample& s) {
   WiFiClient client;
 
   if (!client.connect(host, port)) {
-    log_ln("wifi: error: client connection failed", true);
+    METEOS_LOG_LN("wifi: error: client connection failed");
     return;
   }
 
@@ -105,20 +101,16 @@ void RadioWiFi::post_sample(const Sample& s) {
   unsigned long timeout = millis();
   while (client.available() == 0) {
     if (millis() - timeout > 1000) {
-      log_ln("wifi: error: client timeout", true);
+      METEOS_LOG_LN("wifi: error: client timeout");
       client.stop();
       return;
     }
   }
 
   client.stop();
-
-  log_ln(
-      "wifi: posting sample...done in " + String(millis() - before_ms) + "ms",
-      true);
 }
 
 void RadioWiFi::disconnect() {
   WiFi.disconnect(true);
-  log_ln("wifi: disconnected");
+  METEOS_LOG_LN("wifi: disconnected");
 }

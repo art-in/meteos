@@ -4,26 +4,23 @@
 constexpr int WIFI_CONFIG_WAIT_DELAY = 3000;
 
 void Config::init() {
-  log_ln("config: init...", true);
+  METEOS_SCOPED_LOGGER("config: init");
 
   preferences.begin("meteos");
-
-  auto before_ms = millis();
 
   wifi_ssid_ = preferences.getString("ssid", "").c_str();
   wifi_pass_ = preferences.getString("pass", "").c_str();
 
-  log("config: ssid: ");
-  log_ln(wifi_ssid_.c_str());
-  log("config: pass: ");
-  log_ln(wifi_pass_.c_str());
-  log_ln("config: init...done in " + String(millis() - before_ms) + "ms", true);
+  METEOS_LOG("config: ssid: ");
+  METEOS_LOG_LN(wifi_ssid_.c_str());
+  METEOS_LOG("config: pass: ");
+  METEOS_LOG_LN(wifi_pass_.c_str());
 }
 
 std::string Config::wifi_ssid() const { return wifi_ssid_; }
 
 void Config::wifi_ssid(std::string ssid) {
-  log_ln(String("config: set ssid: ") + ssid.c_str());
+  METEOS_LOG_LN(String("config: set ssid: ") + ssid.c_str());
   wifi_ssid_ = ssid;
   preferences.putString("ssid", ssid.c_str());
 }
@@ -31,7 +28,7 @@ void Config::wifi_ssid(std::string ssid) {
 std::string Config::wifi_pass() const { return wifi_pass_; }
 
 void Config::wifi_pass(std::string pass) {
-  log_ln(String("config: set pass: ") + pass.c_str());
+  METEOS_LOG_LN(String("config: set pass: ") + pass.c_str());
   wifi_pass_ = pass;
   preferences.putString("pass", pass.c_str());
 }
@@ -41,18 +38,17 @@ bool Config::has_wifi_config() {
 }
 
 void Config::wait_wifi_config(std::function<void()> step) {
-  log_ln("config: waiting wifi config...", true);
+  METEOS_SCOPED_LOGGER("config: wait wifi config");
   while (!has_wifi_config()) {
     if (step) {
       step();
     }
     delay(WIFI_CONFIG_WAIT_DELAY);
   }
-  log_ln("config: waiting wifi config...done", true);
 }
 
 void Config::clear() {
-  log_ln("config: clear");
+  METEOS_LOG_LN("config: clear");
   preferences.clear();
   wifi_ssid_ = "";
   wifi_pass_ = "";

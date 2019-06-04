@@ -9,10 +9,10 @@ constexpr auto CHAR_UUID_PASS = "5e527e75-2d5a-40f1-95fb-0e4a7d612ee9";
 
 class ServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer *server_ptr) {
-    log_ln("bt: client connected.", true);
+    METEOS_LOG_LN("bt: client connected.");
   }
   void onDisconnect(BLEServer *server_ptr) {
-    log_ln("bt: client disconnected.", true);
+    METEOS_LOG_LN("bt: client disconnected.");
   };
 };
 
@@ -23,12 +23,12 @@ class SSIDCharacteristicCallbacks : public BLECharacteristicCallbacks {
  private:
   Config &config;
   void onRead(BLECharacteristic *char_ptr) {
-    log("bt: ssid read: ");
-    log_ln(char_ptr->getValue().c_str());
+    METEOS_LOG("bt: ssid read: ");
+    METEOS_LOG_LN(char_ptr->getValue().c_str());
   };
   void onWrite(BLECharacteristic *char_ptr) {
     config.wifi_ssid(char_ptr->getValue());
-    log_ln("bt: ssid written");
+    METEOS_LOG_LN("bt: ssid written");
   };
 };
 
@@ -39,18 +39,17 @@ class PassCharacteristicCallbacks : public BLECharacteristicCallbacks {
  private:
   Config &config;
   void onRead(BLECharacteristic *char_ptr) {
-    log("bt: pass read: ");
-    log_ln(char_ptr->getValue().c_str());
+    METEOS_LOG("bt: pass read: ");
+    METEOS_LOG_LN(char_ptr->getValue().c_str());
   };
   void onWrite(BLECharacteristic *char_ptr) {
     config.wifi_pass(char_ptr->getValue());
-    log_ln("bt: pass written");
+    METEOS_LOG_LN("bt: pass written");
   };
 };
 
 void RadioBT::init() {
-  log_ln("bt: init...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("bt: init");
 
   // init GATT server, service and characteristics
   BLEDevice::init("Meteos Sensor");
@@ -82,28 +81,16 @@ void RadioBT::init() {
   // functions that help with iPhone connections issue
   advertising_ptr->setMinPreferred(0x06);
   advertising_ptr->setMinPreferred(0x12);
-
-  log_ln("bt: init...done in " + String(millis() - before_ms) + "ms", true);
 }
 
 void RadioBT::start_advertising() {
-  log_ln("bt: start advertising...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("bt: start advertising");
 
   advertising_ptr->start();
-
-  log_ln(
-      "bt: start advertising...done in " + String(millis() - before_ms) + "ms",
-      true);
 }
 
 void RadioBT::stop_advertising() {
-  log_ln("bt: stop advertising...", true);
-  auto before_ms = millis();
+  METEOS_SCOPED_LOGGER("bt: stop advertising");
 
   advertising_ptr->stop();
-
-  log_ln(
-      "bt: stop advertising...done in " + String(millis() - before_ms) + "ms",
-      true);
 }

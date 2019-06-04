@@ -1,14 +1,41 @@
 #include <Arduino.h>
+#include <sys/time.h>
 #include <chrono>
 
-#include <sys/time.h>
+#define METEOS_DEBUG_LOG 1
 
-#define uS_TO_S_FACTOR 1000000
-#define uS_TO_MS_FACTOR 1000
+#if METEOS_DEBUG_LOG
+#define METEOS_LOG log
+#define METEOS_LOG_LN log_ln
+#define METEOS_SCOPED_LOGGER(args) \
+  ScopedLogger _ { args }
+#else
+#define METEOS_LOG
+#define METEOS_LOG_LN
+#define METEOS_SCOPED_LOGGER
+#endif
 
-// TODO: log conditionaly with macros
+std::chrono::milliseconds time();
+
 void log(String str, bool to_display = false);
 void log(uint64_t num);
 void log_ln(String str, bool to_display = false);
 
-std::chrono::milliseconds time();
+class ScopedLogger {
+ public:
+  ScopedLogger(String msg_, bool to_display_ = false)
+      : msg{msg_}, to_display{to_display_} {
+    start = time();
+    log_ln(msg + "...", to_display);
+  }
+
+  ~ScopedLogger() {
+    log_ln(msg + "...done in " + String((int)(time() - start).count()) + "ms",
+           to_display);
+  }
+
+ private:
+  std::chrono::milliseconds start;
+  String msg;
+  bool to_display;
+};

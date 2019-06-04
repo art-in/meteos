@@ -6,10 +6,10 @@
 void log(String str, bool to_display) {
   Serial.print(str);
 
-  // Display* disp = Display::get_instance();
-  // if (to_display && disp) {
-  //   (*disp).draw_log(str);
-  // }
+  Display* disp = Display::get_instance();
+  if (to_display && disp) {
+    (*disp).draw_log(str);
+  }
 }
 
 void log(uint64_t num) {

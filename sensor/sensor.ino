@@ -27,7 +27,7 @@ std::chrono::milliseconds latest_display_reading_time;
 
 void setup() {
   Serial.begin(115200);
-  log_ln("main: setup.");
+  METEOS_LOG_LN("main: setup.");
 
   display.init();
   display.draw_logo();
