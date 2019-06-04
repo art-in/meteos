@@ -7,8 +7,9 @@
 
 class RadioWiFi {
  public:
-  bool connect(std::string ssid, std::string pass);
-  bool connect();
+  void init(std::string ssid, std::string pass, std::string host, int port);
+
+  bool connect(bool ignore_reconnect_delay = false);
   static void disconnect();
 
   void post_sample(const Sample &s);
@@ -16,6 +17,8 @@ class RadioWiFi {
  private:
   std::string ssid_;
   std::string pass_;
+  std::string host_;
+  int port_;
 
   std::chrono::milliseconds latest_connect_attempt_time;
 };

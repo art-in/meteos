@@ -12,7 +12,7 @@ void Display::init() {
   display.setContrast(255);
 }
 
-bool Display::is_on() { return is_on_; }
+bool Display::is_reading_shown() { return is_reading_shown_; }
 
 void Display::draw_logo() {
   METEOS_SCOPED_LOGGER("display: draw logo");
@@ -29,7 +29,7 @@ void Display::draw_logo() {
 void Display::draw_next_reading(const Sample& sample) {
   METEOS_SCOPED_LOGGER("display: draw next reading");
 
-  if (is_on_) {
+  if (is_reading_shown_) {
     sample_reading_idx++;
 
     if (sample_reading_idx > 4) {
@@ -46,7 +46,7 @@ void Display::draw_next_reading(const Sample& sample) {
     String value;
     String value_postfix;
 
-    is_on_ = true;
+    is_reading_shown_ = true;
 
     switch (sample_reading_idx) {
       case 0:
@@ -74,6 +74,7 @@ void Display::draw_next_reading(const Sample& sample) {
     display.clearBuffer();
     display.setFontPosTop();
 
+    // TODO: update fonts (profont)
     display.setFont(u8g2_font_t0_11_mf);
     display.drawStr(0, 0, title.c_str());
 
@@ -93,8 +94,10 @@ void Display::draw_wait_config() {
   display.clearBuffer();
   display.setFontPosTop();
 
-  display.setFont(u8g2_font_t0_11_mf);
-  display.drawStr(0, random(45), "waiting config");
+  display.setFont(u8g2_font_profont11_mf);
+  int pos_y = random(39);
+  display.drawStr(0, pos_y, "waiting config...");
+  display.drawStr(0, pos_y + 14, "(press to exit)");
 
   display.sendBuffer();
 }
@@ -111,7 +114,7 @@ void Display::draw_log(String str) {
 }
 
 void Display::clear() {
-  is_on_ = false;
+  is_reading_shown_ = false;
 
   display.clearBuffer();
   display.sendBuffer();

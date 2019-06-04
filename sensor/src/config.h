@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
+#include <chrono>
 #include <functional>
 
 class Config {
@@ -14,8 +15,14 @@ class Config {
   std::string wifi_pass() const;
   void wifi_pass(std::string);
 
-  bool has_wifi_config();
-  void wait_wifi_config(std::function<void()> step);
+  std::string backend_host() const;
+  void backend_host(std::string);
+
+  int backend_port() const;
+  void backend_port(int);
+
+  std::chrono::seconds sample_delay() const;
+  void sample_delay(std::chrono::seconds);
 
   void clear();
 
@@ -24,4 +31,7 @@ class Config {
 
   std::string wifi_ssid_;
   std::string wifi_pass_;
+  std::string backend_host_;
+  int backend_port_;
+  std::chrono::seconds sample_delay_;
 };

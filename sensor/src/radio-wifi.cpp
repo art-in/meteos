@@ -8,33 +8,37 @@
 constexpr auto CONNECT_TIMEOUT = std::chrono::seconds{4};
 constexpr auto RECONNECT_DELAY = std::chrono::minutes{5};
 
-// TODO: move to config
-const char* host = "192.168.1.100";
-constexpr int port = 3300;
-
-bool RadioWiFi::connect() { return connect(ssid_, pass_); }
-
-bool RadioWiFi::connect(std::string ssid, std::string pass) {
-  METEOS_SCOPED_LOGGER("wifi: connect");
-
+void RadioWiFi::init(std::string ssid, std::string pass, std::string host,
+                     int port) {
   ssid_ = ssid;
   pass_ = pass;
+  host_ = host;
+  port_ = port;
+}
+
+bool RadioWiFi::connect(bool ignore_reconnect_delay) {
+  METEOS_SCOPED_LOGGER("wifi: connect");
+
+  if (ssid_.empty() || pass_.empty() || host_.empty() || port_ == 0) {
+    METEOS_LOG_LN("wifi: skipping connect per insufficient config");
+    return false;
+  }
 
   auto now = time();
 
-  if ((latest_connect_attempt_time.count()) &&
+  if (!ignore_reconnect_delay && (latest_connect_attempt_time.count()) &&
       (now - latest_connect_attempt_time < RECONNECT_DELAY)) {
-    // in case AP is unavailable do not try to connect too often to save power.
-    METEOS_LOG_LN("wifi: skipping connect per delay");
+    // do not try to connect too often in case AP is unavailable to save power.
+    METEOS_LOG_LN("wifi: skipping connect per reconnect delay");
     return false;
   }
 
   latest_connect_attempt_time = now;
 
   METEOS_LOG("wifi: connecting to ");
-  METEOS_LOG(ssid.c_str());
+  METEOS_LOG(ssid_.c_str());
 
-  WiFi.begin(ssid.c_str(), pass.c_str());
+  WiFi.begin(ssid_.c_str(), pass_.c_str());
 
   auto start = time();
   wl_status_t status;
@@ -83,7 +87,7 @@ void RadioWiFi::post_sample(const Sample& s) {
 
   WiFiClient client;
 
-  if (!client.connect(host, port)) {
+  if (!client.connect(host_.c_str(), port_)) {
     METEOS_LOG_LN("wifi: error: client connection failed");
     return;
   }
@@ -92,8 +96,8 @@ void RadioWiFi::post_sample(const Sample& s) {
               R"(,"h":)" + s.humidity + R"(,"p":)" + s.pressure + R"(,"c":)" +
               s.co2 + R"(})";
 
-  auto msg = String("POST /samples HTTP/1.1\r\n") + "Host: " + host + ":" +
-             port + "\r\n" + "Content-Type: application/json\r\n" +
+  auto msg = String("POST /samples HTTP/1.1\r\n") + "Host: " + host_.c_str() +
+             ":" + port_ + "\r\n" + "Content-Type: application/json\r\n" +
              "Content-Length: " + json.length() + "\r\n" + "\r\n" + json;
 
   client.print(msg);

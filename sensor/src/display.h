@@ -15,7 +15,7 @@ class Display {
   void draw_log(String);
   void clear();
 
-  bool is_on();
+  bool is_reading_shown();
   static Display* get_instance() { return Display::instance; }
 
  private:
@@ -23,5 +23,5 @@ class Display {
 
   static Display* instance;
   int sample_reading_idx = 0;
-  bool is_on_ = false;
+  bool is_reading_shown_ = false;
 };
