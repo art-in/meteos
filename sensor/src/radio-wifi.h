@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "config.h"
 #include "sample.h"
 
@@ -14,4 +16,6 @@ class RadioWiFi {
  private:
   std::string ssid_;
   std::string pass_;
+
+  std::chrono::milliseconds latest_connect_attempt_time;
 };
