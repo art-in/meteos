@@ -19,6 +19,9 @@ cd meteos/frontend
 ./docker/scripts/run.sh          # run inside container
                                  # --backend-url (required)
                                  # --dev - rebuild on src/ changes
+                                 # --tls-folder - folder with tls certificate
+                                 # --tls-key - file name of certificate private key
+                                 # --tls-cert - file name of certificate
 
 ./docker/scripts/start.sh        # build & run
 ```
@@ -34,6 +37,12 @@ Run prebuilt docker image
 Prerequisites: (1) [docker](https://www.docker.com/).
 
 ```
-# download image from docker hub and run it (set frontend listening port and backend host/port)
-docker run -di -p <port>:3001 artinphares/meteos-frontend --backend-url=<host/port>
+# download image from docker hub and run it (set listening port, backend url and tls certificate)
+docker run -di \
+  -p <port>:3001 \
+  --mount type=bind,src=<cert-folder>,dst=/opt/cert \
+  artinphares/meteos-frontend \
+  --backend-url=<host/port> \
+  --tls-key=<cert-key-filename> \
+  --tls-cert=<cert-filename>
 ```
