@@ -67,7 +67,7 @@ void Display::draw_next_reading(const Sample& sample) {
       case 3:
         title = "co2";
         value = String(sample.co2);
-        value_postfix = "ppx";
+        value_postfix = "ppm";
         break;
     }
 
