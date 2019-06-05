@@ -1,9 +1,12 @@
 #!/bin/bash
 
-# runs project
+# runs frontend server
 #
 # options:
-# --dev - development mode (rebuild on src/ changes, skip optimizations, etc.)
+# --backend-url - (required) url of backend service to fetch environment data from
+# --dev         - development mode (rebuild on src/ changes, skip optimizations, etc.)
+# --tls-key     - file name of certificate private key 
+# --tls-cert    - file name of certificate
 
 # go to project root
 cd $(dirname $(realpath "$0")) && cd ..
@@ -14,6 +17,8 @@ do
     case "$1" in
         --dev) ARG_DEV=1 ;;
         --backend-url*) ARG_BACKEND_URL=$1 ;;
+        --tls-key*) ARG_TLS_KEY=$1 ;;
+        --tls-cert*) ARG_TLS_CERT=$1 ;;
         # sleep infinity instead of just exit, because when container starts with
         # vs-code 'open folder in container' entry point with this script is not 
         # getting overriden with "sleep infinity" as it should.
@@ -30,5 +35,5 @@ if [[ $ARG_DEV ]] ; then
     npx webpack-dev-server --config $(pwd)/webpack.config.js --stdin=false --mode=development &
     npx nodemon --legacy-watch --watch $(pwd)/src/server $(pwd)/src/server/server.js $ARG_BACKEND_URL
 else
-    node $(pwd)/src/server/server.js $ARG_BACKEND_URL
+    node $(pwd)/src/server/server.js $ARG_BACKEND_URL $ARG_TLS_KEY $ARG_TLS_CERT
 fi
