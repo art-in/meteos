@@ -34,6 +34,6 @@ Run prebuilt docker image
 Prerequisites: (1) [docker](https://www.docker.com/).
 
 ```
-# download image from docker hub and run it (set port, TODO: pass backend-url)
-docker run -di -p <port>:3000 artinphares/meteos-frontend
+# download image from docker hub and run it (set frontend listening port and backend host/port)
+docker run -di -p <port>:3001 artinphares/meteos-frontend --backend-url=<host/port>
 ```
