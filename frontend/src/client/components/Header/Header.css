@@ -2,4 +2,11 @@
   outline: 1px dashed orange;
 
   padding: 0.7em;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.config {
+  cursor: pointer;
 }

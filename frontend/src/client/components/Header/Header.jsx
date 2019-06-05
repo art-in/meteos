@@ -3,17 +3,26 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import LoadStatus from '../LoadStatus';
+import ConfigIcon from './icons/config.svg';
 import classes from './Header.css';
 
 const propTypes = {
   className: PropTypes.string.isRequired,
-  status: PropTypes.number.isRequired
+  status: PropTypes.number.isRequired,
+  onConfigOpen: PropTypes.func.isRequired
 };
 
-export default function Header({className, status}) {
+export default function Header({className, status, onConfigOpen}) {
   return (
     <div className={cn(className, classes.root)}>
       <LoadStatus status={status} />
+
+      <ConfigIcon
+        height={20}
+        width={20}
+        className={classes.config}
+        onClick={onConfigOpen}
+      />
     </div>
   );
 }

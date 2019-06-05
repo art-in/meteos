@@ -14,6 +14,10 @@
     '. footer .';
 }
 
+.root.modal-opened {
+  overflow: hidden;
+}
+
 .header {
   grid-area: header;
 }
