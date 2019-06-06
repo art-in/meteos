@@ -35,7 +35,7 @@ sensor | web app (TODO)
 ### Sensor
 
 module | model | link | photo 
---- | --- | --- | --- | ---
+--- | --- | --- | ---
 microcontroller | esp32 | [aliexpress](http://aliexpress.com/item/ESP32-ESP-32-ESP32S-ESP-32S-CP2102-Wireless-WiFi-Bluetooth-Development-Board-Micro-USB-Dual-Core/32867696371.html) | <img src="docs/sensor/parts/esp32-dev-board.jpg" width="200" />
 co2 sensor | mh-z19 | [aliexpress](http://aliexpress.com/item/1PCS-module-MH-Z19-infrared-co2-sensor-for-co2-monitor-Free-shipping/32371956420.html) | <img src="docs/sensor/parts/mh-z19.jpg" width="200" />
 temperature, humidity, pressure sensor | bme280 | [aliexpress](http://aliexpress.com/store/product/BME280/731260_32849462236.html) | <img src="docs/sensor/parts/bme280.jpg" width="200" />
@@ -51,6 +51,8 @@ plastic case (105 х 75 х 26.4 mm) | - | [chipdip (RU)](https://www.chipdip.ru/
 total cost (including shipment from China to Saint-Petersburg, Russia): 2.700 RUB (42 USD)  
 most expensive module: co2 sensor - 1.230 RUB (19 USD)  
 shipment time: 2-4 weeks
+
+---
 
 assembling  |  _
 -- | --
