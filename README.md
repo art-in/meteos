@@ -9,7 +9,8 @@ Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32).
   - humidity
   - pressure
   - co2
- - saving readings to database
+ - sending readings to database over wifi
+ - configuring sensor over bluetooth
  - on-board display to show current readings
  - browser web app to show graphs
 
