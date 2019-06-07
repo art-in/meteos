@@ -23,9 +23,9 @@ shipment time: 2-4 weeks
 
 ### Assembling
 
-_  |  _
+.  |  .
 -- | --
-circuit diagram (TODO) | <img src="https://via.placeholder.com/400x340.png" width="400" />
+circuit diagram | <a href="circuit/meteos-sensor-circuit.pdf"><img src="circuit/meteos-sensor-circuit.png" width="400" /></a>
 assembling on breadboard | <img src="photos/on-breadboard.jpg" width="400" />
 soldering / glueing / drilling / packing in case | <img src="photos/case-internals.jpg" width="400" />
 result | <img src="photos/on-table.jpg" width="400" />

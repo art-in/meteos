@@ -26,4 +26,4 @@ sensor | web app (TODO)
 
 ---
 
-[Sensor - assembling device (components, circuit diagram, etc.)](docs/sensor/readme.md)
+[Assembling Sensor device (components, circuit diagram, etc.)](docs/sensor/readme.md)
