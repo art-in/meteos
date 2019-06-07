@@ -1,6 +1,6 @@
-### Modules
+### Components
 
-module | model | link | photo 
+component | model | link | photo 
 --- | --- | --- | ---
 microcontroller | esp32 | [aliexpress](http://aliexpress.com/item/ESP32-ESP-32-ESP32S-ESP-32S-CP2102-Wireless-WiFi-Bluetooth-Development-Board-Micro-USB-Dual-Core/32867696371.html) | <img src="photos/parts/esp32-dev-board.jpg" width="200" />
 co2 sensor | mh-z19 | [aliexpress](http://aliexpress.com/item/1PCS-module-MH-Z19-infrared-co2-sensor-for-co2-monitor-Free-shipping/32371956420.html) | <img src="photos/parts/mh-z19.jpg" width="200" />
@@ -25,7 +25,7 @@ shipment time: 2-4 weeks
 
 _  |  _
 -- | --
-electric schema (TODO) | <img src="https://via.placeholder.com/400x340.png" width="400" />
+circuit diagram (TODO) | <img src="https://via.placeholder.com/400x340.png" width="400" />
 assembling on breadboard | <img src="photos/on-breadboard.jpg" width="400" />
 soldering / glueing / drilling / packing in case | <img src="photos/case-internals.jpg" width="400" />
 result | <img src="photos/on-table.jpg" width="400" />
