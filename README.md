@@ -26,4 +26,4 @@ sensor | web app (TODO)
 
 ---
 
-[Sensor - assembling handware (modules, electric schema, etc.)](docs/sensor/readme.md)
+[Sensor - assembling device (components, circuit diagram, etc.)](docs/sensor/readme.md)
