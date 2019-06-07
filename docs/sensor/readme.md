@@ -16,7 +16,7 @@ plastic case (105 х 75 х 26.4 mm) | - | [chipdip (RU)](https://www.chipdip.ru/
 
 total cost (including shipment from China to Saint-Petersburg, Russia): 2.700 RUB (42 USD)  
 
-most expensive module: co2 sensor - 1.230 RUB (19 USD)  
+most expensive component: co2 sensor - 1.230 RUB (19 USD)  
 shipment time: 2-4 weeks
 
 ---
