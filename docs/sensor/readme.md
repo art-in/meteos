@@ -1,4 +1,4 @@
-### Parts
+### Modules
 
 module | model | link | photo 
 --- | --- | --- | ---
@@ -26,6 +26,6 @@ shipment time: 2-4 weeks
 _  |  _
 -- | --
 electric schema (TODO) | <img src="https://via.placeholder.com/400x340.png" width="400" />
-assembled on breadboard | <img src="photos/on-breadboard.jpg" width="400" />
-soldered & glued inside case | <img src="photos/case-internals.jpg" width="400" />
+assembling on breadboard | <img src="photos/on-breadboard.jpg" width="400" />
+soldering / glueing / drilling / packing in case | <img src="photos/case-internals.jpg" width="400" />
 result | <img src="photos/on-table.jpg" width="400" />
