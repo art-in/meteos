@@ -1,4 +1,5 @@
 const path = require('path');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = (env, argv) => ({
   entry: path.resolve(__dirname, 'src/client/client.js'),
@@ -6,6 +7,18 @@ module.exports = (env, argv) => ({
     path: path.resolve(__dirname, 'src/client/dist'),
     filename: 'bundle.js'
   },
+  plugins: [
+    new WorkboxPlugin.GenerateSW({
+      // do not use CDN for workbox runtime libs
+      importWorkboxFrom: 'local',
+      swDest: 'sw-cache.js',
+      importsDirectory: 'sw-cache-assets',
+
+      // add additional files to cache
+      globDirectory: path.resolve(__dirname, 'src/client/dist'),
+      globPatterns: ['index.html', 'manifest.json', 'favicon-16.png', 'favicon-144.png']
+    })
+  ],
   module: {
     rules: [
       {

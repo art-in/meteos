@@ -1,0 +1,18 @@
+{
+    "name": "meteos",
+    "short_name": "meteos",
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#141414",
+    "background_color": "#141414",
+    "icons": [
+        {
+            "src": "favicon-16.png",
+            "sizes": "16x16"
+        },
+        {
+            "src": "favicon-144.png",
+            "sizes": "144x144"
+        }
+    ]
+}
