@@ -1,12 +1,12 @@
 .root {
-  outline: 1px dashed green;
-
   display: flex;
   position: relative;
 
   /* hide chart tooltip while shrinking window. otherwise tooltip stays in place
-     and horizontal scroll bar appears. */
+     triggering horizontal scroll bar on window. */
   overflow: hidden;
+
+  background-color: #1f1d1d;
 }
 
 .period-selector {
@@ -15,11 +15,6 @@
   
   top: 1rem;
   left: 1rem;
-}
-
-.count {
-  position: absolute;
-  top: 3rem;
 }
 
 .list {

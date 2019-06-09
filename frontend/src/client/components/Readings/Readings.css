@@ -1,6 +1,4 @@
 .root {
-  outline: 1px dashed blue;
-
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

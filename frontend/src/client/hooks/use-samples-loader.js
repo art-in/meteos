@@ -15,7 +15,7 @@ const SAMPLES_LIMIT = 500;
  * @param {string} period - last hour/week/month/etc.
  */
 export default function useSamplesLoader(period) {
-  const [loadStatus, setLoadStatus] = useState(LoadStatusType.disconnected);
+  const [loadStatus, setLoadStatus] = useState(LoadStatusType.connected);
   const [loadedSamples, setLoadedSamples] = useState([]);
   const [actualSample, setActualSample] = useState();
   const prevPeriod = usePrevious(period);

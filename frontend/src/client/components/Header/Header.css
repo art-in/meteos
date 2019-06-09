@@ -1,12 +1,13 @@
 .root {
-  outline: 1px dashed orange;
-
   padding: 0.7em;
 
   display: flex;
   justify-content: space-between;
+
+  background-color: #1f1d1d;
 }
 
 .config {
   cursor: pointer;
+  fill: #808080;
 }

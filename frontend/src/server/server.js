@@ -57,8 +57,8 @@ server.listen(PORT, HOST, function(err) {
     `Server started\n` +
       table([
         ['\t backend url', argv.backendUrl],
-        ['\t key file', isTLS ? argv.tlsKey : '---'],
-        ['\t cert file', isTLS ? argv.tlsCert : '---'],
+        ['\t tls key file', isTLS ? argv.tlsKey : '---'],
+        ['\t tls cert file', isTLS ? argv.tlsCert : '---'],
         ['\t listening at', `${scheme}://${HOST}:${PORT}`]
       ])
   );

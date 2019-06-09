@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import cn from 'classnames';
 
 import PeriodType from 'utils/PeriodType';
+import classes from './PeriodSelector.css';
 
 const propTypes = {
   className: PropTypes.string,
@@ -12,7 +14,7 @@ const propTypes = {
 export default function PeriodSelector({className, period, onPeriodChange}) {
   return (
     <select
-      className={className}
+      className={cn(className, classes.root)}
       value={period}
       onChange={event => onPeriodChange(event.target.value)}
     >

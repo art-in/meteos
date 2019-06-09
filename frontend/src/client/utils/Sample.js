@@ -22,7 +22,7 @@ export default class Sample {
     this.pressure = pressure;
     this.co2 = co2;
 
-    // precompute for chart
+    // precompute for the chart
     this.timeMs = time ? Number(moment(time)) : null;
   }
 }

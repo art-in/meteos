@@ -14,7 +14,7 @@ export default function Modal({children, onClose}) {
     <div className={classes.root} onClick={onClose}>
       <div className={classes.content} onClick={e => e.stopPropagation()}>
         {children}
-        <CloseIcon className={classes.close} width={20} onClick={onClose} />
+        <CloseIcon className={classes.close} width={15} onClick={onClose} />
       </div>
     </div>
   );

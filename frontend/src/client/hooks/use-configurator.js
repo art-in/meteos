@@ -10,12 +10,13 @@ const CHAR_UUID_BACKEND_PORT = '4bb0157c-1c74-4cfb-81d8-351b895ce811';
 const CHAR_UUID_SAMPLE_DELAY = 'a8222441-cb54-46d6-8765-173b3b1e06e2';
 
 /**
- * Provides access to Sensor configuration bluetooth service.
+ * Provides access to Sensor configuration service over bluetooth.
  */
 export default function useConfigurator() {
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [config, setConfig] = useState({});
-  const [isUpdatingConfig, setIsUpdatingConfig] = useState(false);
+  const [isUploadingConfig, setIsUploadingConfig] = useState(false);
 
   const charsRef = useRef();
   const deviceRef = useRef();
@@ -44,6 +45,8 @@ export default function useConfigurator() {
       alert(`Failed to request bluetooth device:\n${e.message}`);
       throw e;
     }
+
+    setIsConnecting(true);
 
     deviceRef.current = device;
     device.addEventListener('gattserverdisconnected', onGATTServerDisconnected);
@@ -84,12 +87,11 @@ export default function useConfigurator() {
 
     log('characteristics read.');
 
+    setIsConnecting(false);
     setIsConnected(true);
   }, [onGATTServerDisconnected]);
 
   const disconnect = useCallback(() => {
-    log('disconnecting from GATT server...');
-
     const device = deviceRef.current;
     const server = serverRef.current;
 
@@ -98,12 +100,14 @@ export default function useConfigurator() {
       onGATTServerDisconnected
     );
     server.disconnect();
+
+    log('disconnected from GATT server.');
   }, [onGATTServerDisconnected]);
 
-  const updateConfig = useCallback(
+  const uploadConfig = useCallback(
     async (wifiSSID, wifiPass, backendHost, backendPort, sampleDelay) => {
       log('writing to characteristics...');
-      setIsUpdatingConfig(true);
+      setIsUploadingConfig(true);
 
       try {
         var enc = new TextEncoder(); // utf-8
@@ -121,7 +125,7 @@ export default function useConfigurator() {
         alert(`Failed to write service characteristics:\n${e.message}`);
         throw e;
       } finally {
-        setIsUpdatingConfig(false);
+        setIsUploadingConfig(false);
       }
     },
     []
@@ -129,11 +133,12 @@ export default function useConfigurator() {
 
   return {
     isConnected,
+    isConnecting,
     connect,
     disconnect,
 
     config,
-    updateConfig,
-    isUpdatingConfig
+    uploadConfig,
+    isUploadingConfig
   };
 }

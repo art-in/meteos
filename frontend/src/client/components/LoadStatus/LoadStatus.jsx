@@ -16,15 +16,15 @@ export default function LoadStatus({status}) {
 
   switch (status) {
     case LoadStatusType.connected:
-      title = 'Connected. All good.';
-      icon = <ConnectedIcon width="20" />;
+      title = 'Connected to server. Environment data is up to date.';
+      icon = <ConnectedIcon width="20" fill="#808080" />;
       break;
     case LoadStatusType.outdated:
-      title = 'Environment readings are outdated.';
+      title = 'Connected to server. Environment data is outdated.';
       icon = <OutdatedIcon width="20" />;
       break;
     case LoadStatusType.disconnected:
-      title = 'Disconnected.';
+      title = 'Disconnected from server.';
       icon = <DisconnectedIcon width="20" />;
       break;
     default:

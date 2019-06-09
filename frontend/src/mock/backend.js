@@ -12,19 +12,19 @@ const start = moment().subtract(1, 'week');
 
 const TEMPERATURE_MIN = 26;
 const TEMPERATURE_MAX = 29;
-const TEMPERATURE_STEP = 0.1;
+const TEMPERATURE_STEP = 0.01;
 
 const HUMIDITY_MIN = 40;
 const HUMIDITY_MAX = 50;
-const HUMIDITY_STEP = 1;
+const HUMIDITY_STEP = 0.01;
 
 const PRESSURE_MIN = 740;
 const PRESSURE_MAX = 760;
-const PRESSURE_STEP = 1;
+const PRESSURE_STEP = 0.01;
 
 const CO2_MIN = 450;
 const CO2_MAX = 1000;
-const CO2_STEP = 10;
+const CO2_STEP = 1;
 
 app.get('/samples', (req, res) => {
   let from = req.query.from;

@@ -6,12 +6,14 @@ import {
   ResponsiveContainer,
   XAxis,
   YAxis,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   CartesianGrid,
   Tooltip
 } from 'recharts';
 
+import colors from 'utils/colors';
+import units from 'utils/units';
 import Sample from 'utils/Sample';
 import PeriodType from 'utils/PeriodType';
 import PeriodSelector from '../PeriodSelector';
@@ -66,11 +68,66 @@ export default function Chart({className, samples, period, onPeriodChange}) {
         onPeriodChange={onPeriodChange}
       />
 
-      <div className={classes.count}>samples count: {samples.length}</div>
-
       <ResponsiveContainer>
-        <LineChart data={samples}>
-          <CartesianGrid strokeDasharray="3 3" />
+        <AreaChart data={samples}>
+          <defs>
+            <linearGradient id="gradientCO2" x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="0%"
+                stopColor={colors.co2.secondary}
+                stopOpacity={0.4}
+              />
+              <stop
+                offset="30%"
+                stopColor={colors.co2.secondary}
+                stopOpacity={0}
+              />
+            </linearGradient>
+            <linearGradient id="gradientPressure" x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="0%"
+                stopColor={colors.pressure.secondary}
+                stopOpacity={0.2}
+              />
+              <stop
+                offset="30%"
+                stopColor={colors.pressure.secondary}
+                stopOpacity={0}
+              />
+            </linearGradient>
+            <linearGradient id="gradientHumidity" x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="0%"
+                stopColor={colors.humidity.secondary}
+                stopOpacity={0.2}
+              />
+              <stop
+                offset="30%"
+                stopColor={colors.humidity.secondary}
+                stopOpacity={0}
+              />
+            </linearGradient>
+            <linearGradient
+              id="gradientTemperature"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="0%"
+                stopColor={colors.temperature.secondary}
+                stopOpacity={0.4}
+              />
+              <stop
+                offset="30%"
+                stopColor={colors.temperature.secondary}
+                stopOpacity={0}
+              />
+            </linearGradient>
+          </defs>
+
+          <CartesianGrid strokeDasharray="3 3" stroke="#808080" />
           <XAxis
             dataKey="timeMs"
             interval={'preserveStartEnd'}
@@ -87,51 +144,66 @@ export default function Chart({className, samples, period, onPeriodChange}) {
           <Tooltip
             isAnimationActive={false}
             labelFormatter={formatLabel}
-            labelStyle={{paddingBottom: 10, color: 'gray'}}
+            labelStyle={{
+              paddingBottom: 10,
+              color: '#808080'
+            }}
+            contentStyle={{
+              backgroundColor: '#1f1d1d',
+              border: '2px solid #808080'
+            }}
             itemStyle={{paddingRight: 20}}
           />
 
-          <Line
+          <Area
             dataKey="co2"
             yAxisId="co2"
             type="basis"
             isAnimationActive={false}
-            dot={{fill: '#006400', r: 1.5}}
-            activeDot={{stroke: 'red', r: 1.5}}
-            stroke="none"
-            unit=" ppm"
+            fill="url(#gradientCO2)"
+            fillOpacity={1}
+            dot={{stroke: colors.co2.primary, r: 0.8}}
+            activeDot={{stroke: '#fff', r: 1.5}}
+            stroke={colors.co2.secondary}
+            unit={' ' + units.co2}
           />
-          <Line
+          <Area
             dataKey="pressure"
             yAxisId="pressure"
             type="basis"
             isAnimationActive={false}
-            dot={{fill: '#222222', r: 1.5}}
-            activeDot={{stroke: 'red', r: 1.5}}
-            stroke="none"
-            unit=" mm hg"
+            fill="url(#gradientPressure)"
+            fillOpacity={1}
+            dot={{stroke: colors.pressure.primary, r: 0.8}}
+            activeDot={{stroke: '#fff', r: 1.5}}
+            stroke={colors.pressure.secondary}
+            unit={' ' + units.pressure}
           />
-          <Line
+          <Area
             dataKey="humidity"
             yAxisId="humidity"
             type="basis"
             isAnimationActive={false}
-            dot={{fill: '#0000ff', r: 1.5}}
-            activeDot={{stroke: 'red', r: 1.5}}
-            stroke="none"
-            unit=" %"
+            fill="url(#gradientHumidity)"
+            fillOpacity={1}
+            dot={{stroke: colors.humidity.primary, r: 0.8}}
+            activeDot={{stroke: '#fff', r: 1.5}}
+            stroke={colors.humidity.secondary}
+            unit={' ' + units.humidity}
           />
-          <Line
+          <Area
             dataKey="temperature"
             yAxisId="temperature"
             type="basis"
             isAnimationActive={false}
-            dot={{fill: '#ff0000', r: 1.5}}
-            activeDot={{stroke: 'red', r: 1.5}}
-            stroke="none"
-            unit=" °C"
+            fill="url(#gradientTemperature)"
+            fillOpacity={1}
+            dot={{stroke: colors.temperature.primary, r: 0.8}}
+            activeDot={{stroke: '#fff', r: 1.5}}
+            stroke={colors.temperature.secondary}
+            unit={' ' + units.temperature}
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

@@ -17,33 +17,39 @@ const defaultProps = {
 };
 
 export default function Readings({className, sample}) {
-  const title = sample.time ? moment(sample.time).format('HH:mm:ss') : '';
+  const title = sample.time
+    ? `Last update: ${moment(sample.time).format('HH:mm:ss')}`
+    : '';
 
   return (
     <div className={cn(className, classes.root)} title={title}>
       <Reading
         className={classes.reading}
-        title="Temperature"
+        type="temperature"
+      
         value={sample.temperature}
-        valueSuffix={'°C'}
+      
       />
       <Reading
         className={classes.reading}
-        title="Humidity"
+        type="humidity"
+      
         value={sample.humidity}
-        valueSuffix={'%'}
+      
       />
       <Reading
         className={classes.reading}
-        title="Pressure"
+        type="pressure"
+        
         value={sample.pressure}
-        valueSuffix={'mm hg'}
+ 
       />
       <Reading
         className={classes.reading}
-        title="CO2"
+        type="co2"
+      
         value={sample.co2}
-        valueSuffix={'ppm'}
+      
       />
     </div>
   );

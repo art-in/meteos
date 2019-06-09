@@ -2,12 +2,13 @@
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
-
         // prettier formatting rules (has no code quality rules).
         // turns off eslint rules which are in conflict.
         "plugin:prettier/recommended"
     ],
-    "plugins": ["react-hooks"],
+    "plugins": [
+        "react-hooks"
+    ],
     "parser": "babel-eslint",
     "parserOptions": {
         "ecmaVersion": 2018,
@@ -16,7 +17,11 @@
             "jsx": true
         }
     },
-    "env": {"node": true, "browser": true},
+    "env": {
+        "node": true,
+        "browser": true,
+        "es6": true
+    },
     "rules": {
         // turn on prettier formatting rules
         "prettier/prettier": [
@@ -26,11 +31,9 @@
                 // extended in certain cases (eg. in long assigments, imports).
                 // note: not respected in comments at all.
                 "printWidth": 80,
-
                 // spaces add to line width, and sometimes look very ugly
                 // (eg. nested destructuring: "{vm: { main: { mindset } } } }")
                 "bracketSpacing": false,
-
                 // single quotes make bit less visual noise than double quotes.
                 // note: jsx will always use double quotes.
                 "singleQuote": true
@@ -42,11 +45,9 @@
                 // hard line width limit. preferred line width is controlled by
                 // prettier and equals 80
                 "code": 160,
-
                 // prettier does not control line width in comments, so enforce it
                 // with eslint
                 "comments": 80,
-
                 // urls in comments cannot be wrapped, so we need to ignore them
                 "ignoreUrls": true
             }
@@ -54,12 +55,10 @@
         // since this is not a lib to embed into another project
         // and make noise there, i feel free to log anything
         "no-console": 0,
-        
         // enforce to use 'const' over 'let' to follow spec meaning
         "prefer-const": [
             "error"
         ],
-
         // react hooks
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn"

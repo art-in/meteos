@@ -4,6 +4,10 @@
   margin: 0;
 }
 
+:global(body) {
+  background-color: #141414;
+}
+
 :global(body),
 :global(input),
 :global(textarea),

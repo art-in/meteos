@@ -42,6 +42,7 @@ module.exports = {
             'border-right',
             'border-bottom',
             'border-left',
+            'border-width',
             'outline',
             'stroke-width'
           ],

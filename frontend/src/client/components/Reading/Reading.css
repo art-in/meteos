@@ -1,16 +1,18 @@
 .root {
-  outline: 1px dashed lightblue;
-
   flex-grow: 1;
   flex-shrink: 1;
   flex-basis: 19rem;
   max-width: 19rem;
 
   padding: 0.3em;
+  border-radius: 0.125em;
+
+  border-width: 1px;
+  border-style: solid;
 }
 
 .title {
-  color: gray;
+  color: #fff;
   text-transform: lowercase;
 }
 
@@ -19,8 +21,12 @@
   font-size: 1.9rem;
 }
 
-.value-suffix {
-  color: gray;
+.value {
+  color: #fff;
+}
+
+.unit {
+  color: #fff;
   margin-left: 0.7em;
   font-size: 0.9rem;
   width: 2.5rem;

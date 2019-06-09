@@ -1,40 +1,55 @@
 import React, {useRef, useCallback, useEffect} from 'react';
+import cn from 'classnames';
 
 import useConfigurator from 'hooks/use-configurator';
+import ConnectIcon from './icons/connect.svg';
+import UploadIcon from './icons/upload.svg';
 import classes from './ConfigForm.css';
 
 const CONNECT_BUTTON_TITLE =
-  'Connects to sensor over bluetooth (make sure device is in config mode)';
-const UPDATE_BUTTON_TITLE = 'Sends configuration to sensor';
+  'Connect to Sensor over bluetooth (device should be in config mode)';
+const CONNECT_BUTTON_TITLE_DONE = 'Connected to Sensor';
+const UPLOAD_BUTTON_TITLE = 'Upload configuration to Sensor';
 
 export default function ConfigForm() {
   const {
     isConnected,
+    isConnecting,
     connect,
     disconnect,
     config,
-    updateConfig,
-    isUpdatingConfig
+    uploadConfig,
+    isUploadingConfig
   } = useConfigurator();
 
   const formRef = useRef();
-  const inputRefWifiSSID = useRef();
-  const inputRefWifiPass = useRef();
-  const inputRefBackendHost = useRef();
-  const inputRefBackendPort = useRef();
-  const inputRefSampleDelay = useRef();
+  const inputRef_wifiSSID = useRef();
+  const inputRef_wifiPass = useRef();
+  const inputRef_backendHost = useRef();
+  const inputRef_backendPort = useRef();
+  const inputRef_sampleDelay = useRef();
+
+  const isConnectDisabled = isConnected || isConnecting;
+  const isUploadDisabled = !isConnected || isUploadingConfig;
 
   const onConnect = useCallback(
     e => {
       e.preventDefault();
-      connect();
+
+      if (!isConnectDisabled) {
+        connect();
+      }
     },
-    [connect]
+    [isConnectDisabled, connect]
   );
 
-  const onUpdate = useCallback(
+  const onUpload = useCallback(
     e => {
       e.preventDefault();
+
+      if (isUploadDisabled) {
+        return;
+      }
 
       const form = formRef.current;
       if (!form.reportValidity()) {
@@ -42,15 +57,15 @@ export default function ConfigForm() {
         return;
       }
 
-      const wifiSSID = inputRefWifiSSID.current.value;
-      const wifiPass = inputRefWifiPass.current.value;
-      const backendHost = inputRefBackendHost.current.value;
-      const backendPort = inputRefBackendPort.current.value;
-      const sampleDelay = inputRefSampleDelay.current.value;
+      const wifiSSID = inputRef_wifiSSID.current.value;
+      const wifiPass = inputRef_wifiPass.current.value;
+      const backendHost = inputRef_backendHost.current.value;
+      const backendPort = inputRef_backendPort.current.value;
+      const sampleDelay = inputRef_sampleDelay.current.value;
 
-      updateConfig(wifiSSID, wifiPass, backendHost, backendPort, sampleDelay);
+      uploadConfig(wifiSSID, wifiPass, backendHost, backendPort, sampleDelay);
     },
-    [updateConfig]
+    [isUploadDisabled, uploadConfig]
   );
 
   useEffect(() => {
@@ -65,18 +80,19 @@ export default function ConfigForm() {
   return (
     <form className={classes.root} autoComplete="off" ref={formRef}>
       <div className={classes.field}>
-        <button
-          title={CONNECT_BUTTON_TITLE}
-          disabled={isConnected}
-          onClick={onConnect}
+        <div
+          className={cn(classes.connect, {
+            [classes.disabled]: isConnectDisabled
+          })}
+          title={isConnected ? CONNECT_BUTTON_TITLE_DONE : CONNECT_BUTTON_TITLE}
         >
-          Connect
-        </button>
+          <ConnectIcon width={50} onClick={onConnect} />
+        </div>
       </div>
 
       <div className={classes.field}>
         <label htmlFor="wifi-ssid" className={classes.title}>
-          WiFi SSID
+          Wi-Fi SSID
         </label>
         <input
           id="wifi-ssid"
@@ -84,12 +100,12 @@ export default function ConfigForm() {
           required
           defaultValue={config.wifiSSID}
           disabled={!isConnected}
-          ref={inputRefWifiSSID}
+          ref={inputRef_wifiSSID}
         />
       </div>
       <div className={classes.field}>
         <label htmlFor="wifi-pass" className={classes.title}>
-          WiFi Password
+          Wi-Fi Password
         </label>
         <input
           id="wifi-pass"
@@ -97,7 +113,7 @@ export default function ConfigForm() {
           type="password"
           defaultValue={config.wifiPass}
           disabled={!isConnected}
-          ref={inputRefWifiPass}
+          ref={inputRef_wifiPass}
         />
       </div>
       <div className={classes.field}>
@@ -110,7 +126,7 @@ export default function ConfigForm() {
           required
           defaultValue={config.backendHost}
           disabled={!isConnected}
-          ref={inputRefBackendHost}
+          ref={inputRef_backendHost}
         />
       </div>
       <div className={classes.field}>
@@ -126,7 +142,7 @@ export default function ConfigForm() {
           max="65535"
           defaultValue={config.backendPort}
           disabled={!isConnected}
-          ref={inputRefBackendPort}
+          ref={inputRef_backendPort}
         />
       </div>
       <div className={classes.field}>
@@ -141,18 +157,19 @@ export default function ConfigForm() {
           required
           defaultValue={config.sampleDelay}
           disabled={!isConnected}
-          ref={inputRefSampleDelay}
+          ref={inputRef_sampleDelay}
         />
       </div>
 
       <div className={classes.field}>
-        <button
-          title={UPDATE_BUTTON_TITLE}
-          disabled={!isConnected || isUpdatingConfig}
-          onClick={onUpdate}
+        <div
+          title={UPLOAD_BUTTON_TITLE}
+          className={cn(classes.upload, {
+            [classes.disabled]: isUploadDisabled
+          })}
         >
-          Update
-        </button>
+          <UploadIcon width={50} onClick={onUpload} />
+        </div>
       </div>
     </form>
   );

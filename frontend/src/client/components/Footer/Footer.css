@@ -1,7 +1,5 @@
 .root {
-  outline: 1px dashed gray;
-
   padding: 0.7em;
-  color: gray;
+  color: #808080;
   text-align: center;
 }
