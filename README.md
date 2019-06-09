@@ -14,9 +14,9 @@ Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32) with databa
 
 ---
 
-<img src="docs/sensor/photos/in-hand.jpg" height="340" /> | <img src="docs/web-app/phone.png" height="340" /> <img src="docs/web-app/desktop.png" height="340" />
-:---: | :---:
-sensor | web app
+<img src="docs/sensor/photos/in-hand.jpg" width="400" max-height="340" /> | <img src="docs/web-app/phone.png" width="200" max-height="340" /> | <img src="docs/web-app/desktop.png" width="400" max-height="340" />
+:---: | :---: | :---:
+
 
 ---
 
