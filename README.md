@@ -1,4 +1,4 @@
-Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32).
+Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32) with database and web app.
 
 ---
 
