@@ -13,7 +13,10 @@ const table = require('text-table');
 
 const PORT = 3001;
 const HOST = '0.0.0.0';
+const LOG_FILE = '/opt/log/frontend.log';
+const LOG_FORMAT = ':date[iso] - :remote-addr - :method - :url - :status - ":user-agent"'
 const CERT_FOLDER = '/opt/cert/';
+
 
 const argv = yargs
   .version(false)
@@ -27,7 +30,13 @@ const argv = yargs
 
 const app = express();
 
-app.use(logger('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(logger('dev'));
+} else {
+  const logStream = fs.createWriteStream(LOG_FILE, {flags: 'a'});
+  app.use(logger(LOG_FORMAT, {stream: logStream}));
+}
+
 app.use(express.static(path.resolve(__dirname, '../client/dist/')));
 app.use('/api', proxy({target: argv.backendUrl, pathRewrite: {'^/api': ''}}));
 

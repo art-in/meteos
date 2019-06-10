@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# builds project
+# builds frontend
 
 # go to project root
 cd $(dirname $(realpath "$0")) && cd ..

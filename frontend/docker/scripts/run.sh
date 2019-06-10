@@ -5,6 +5,7 @@
 # options:
 # --backend-url - (required) url of backend service to fetch environment data from
 # --dev         - development mode (rebuild on src/ changes, skip optimizations, etc.)
+# --log-folder  - folder to drop log file to
 # --tls-folder  - folder with tls certificate
 # --tls-key     - file name of certificate private key 
 # --tls-cert    - file name of certificate
@@ -21,6 +22,7 @@ do
     case "$1" in
         --dev) ARG_DEV=1 ;;
         --backend-url*) ARG_BACKEND_URL=$1 ;;
+        --log-folder*) ARG_LOG_FOLDER=$1 ;;
         --tls-folder*) ARG_TLS_FOLDER=$1 ;;
         --tls-key*) ARG_TLS_KEY=$1 ;;
         --tls-cert*) ARG_TLS_CERT=$1 ;;
@@ -31,6 +33,16 @@ done
 
 if [[ -z $ARG_BACKEND_URL ]] ; then
     echo "Missing required argument: --backend-url"; exit 1;
+fi
+
+if [[ $ARG_LOG_FOLDER ]] ; then
+    if [[ $ARG_DEV ]] ; then
+        echo "Logging to file is not supported in dev mode"; exit 1;
+    fi
+
+    PARTS=(${ARG_LOG_FOLDER//=/ }) # split by '='
+    LOG_FOLDER=${PARTS[1]}
+    ARG_LOG_FOLDER_MOUNT="--mount type=bind,src=$LOG_FOLDER,dst=/opt/log"
 fi
 
 if [[ $ARG_TLS_FOLDER ]] ; then
@@ -59,6 +71,7 @@ if [[ $ARG_DEV ]] ; then
         --dev
 else
     docker run \
+        $ARG_LOG_FOLDER_MOUNT \
         $ARG_TLS_FOLDER_MOUNT \
         -p 3001:3001  \
         $DOCKER_IMAGE \

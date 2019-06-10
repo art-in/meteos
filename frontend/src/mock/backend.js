@@ -26,6 +26,8 @@ const CO2_MIN = 450;
 const CO2_MAX = 1000;
 const CO2_STEP = 1;
 
+app.get('/time', (req, res) => res.send(moment().toISOString()));
+
 app.get('/samples', (req, res) => {
   let from = req.query.from;
   const limit = req.query.limit || 1000;
