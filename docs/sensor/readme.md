@@ -2,8 +2,8 @@
 
 component | model | link | photo 
 --- | --- | --- | ---
-microcontroller | esp32 | [aliexpress](http://aliexpress.com/item/ESP32-ESP-32-ESP32S-ESP-32S-CP2102-Wireless-WiFi-Bluetooth-Development-Board-Micro-USB-Dual-Core/32867696371.html) | <img src="photos/parts/esp32-dev-board.jpg" width="200" />
-co2 sensor | mh-z19 | [aliexpress](http://aliexpress.com/item/1PCS-module-MH-Z19-infrared-co2-sensor-for-co2-monitor-Free-shipping/32371956420.html) | <img src="photos/parts/mh-z19.jpg" width="200" />
+microcontroller | esp32 doit devkit v1 | [aliexpress](http://aliexpress.com/item/ESP32-ESP-32-ESP32S-ESP-32S-CP2102-Wireless-WiFi-Bluetooth-Development-Board-Micro-USB-Dual-Core/32867696371.html) | <img src="photos/parts/esp32-dev-board.jpg" width="200" />
+co2 sensor | mh-z19b | [aliexpress](http://aliexpress.com/item/1PCS-module-MH-Z19-infrared-co2-sensor-for-co2-monitor-Free-shipping/32371956420.html) | <img src="photos/parts/mh-z19.jpg" width="200" />
 temperature, humidity, pressure sensor | bme280 | [aliexpress](http://aliexpress.com/store/product/BME280/731260_32849462236.html) | <img src="photos/parts/bme280.jpg" width="200" />
 OLED display (1.3", 128 x 64) | sh1106 | [aliexpress](http://aliexpress.com/item/1PCS-1-3-OLED-module-white-color-128X64-1-3-inch-OLED-LCD-LED-Display-Module/32796086867.html) | <img src="photos/parts/sh1106.jpg" width="200" />
 li-ion battery (18650) | ncr18650b | [aliexpress](http://aliexpress.com/item/2PCS-100-New-Original-NCR18650B-3-7-v-3400-mah-18650-Lithium-Rechargeable-Battery-Flashlight-Digital/32324914059.html) | <img src="photos/parts/ncr18650b.jpg" width="200" />
@@ -23,9 +23,10 @@ shipment time: 2-4 weeks
 
 ### Assembling
 
-.  |  .
+<span style="display: none"><span>  |  <span style="display: none"><span>
 -- | --
 circuit diagram | <a href="circuit/meteos-sensor-circuit.pdf"><img src="circuit/meteos-sensor-circuit.png" width="400" /></a>
 assembling on breadboard | <img src="photos/on-breadboard.jpg" width="400" />
 soldering / glueing / drilling / packing in case | <img src="photos/case-internals.jpg" width="400" />
-result | <img src="photos/on-table.jpg" width="400" />
+connecting to usb for charging / debugging | <img src="photos/connecting-usb.jpg" width="400" />
+front side | <img src="photos/on-table.jpg" width="400" /> <br> <img src="photos/on-table-reverse.jpg" width="400" />
