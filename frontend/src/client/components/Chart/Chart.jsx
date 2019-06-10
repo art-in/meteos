@@ -28,8 +28,10 @@ const propTypes = {
 };
 
 export default function Chart({className, samples, period, onPeriodChange}) {
-  const periodStartMs = Number(moment().subtract(1, period));
-  const periodEndMs = Number(moment());
+  const now = moment();
+
+  const periodStartMs = Number(moment(now).subtract(1, period));
+  const periodEndMs = Number(now);
 
   // TODO: remove when recharts bug is fixed
   // https://github.com/recharts/recharts/issues/1493

@@ -1,6 +1,14 @@
 import Sample from './Sample';
 import moment from 'moment';
 
+export async function getTime() {
+  const response = await fetch('api/time');
+  if (response.status !== 200) {
+    throw Error('request failed');
+  }
+  return await response.text();
+}
+
 export async function getSamples({from, limit}) {
   let url = 'api/samples';
 

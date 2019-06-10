@@ -5,8 +5,8 @@ import usePrevious from 'hooks/use-previous';
 import LoadStatusType from 'utils/LoadStatusType';
 import * as api from 'utils/api';
 
-const RELOAD_DELAY = 10000; // ms
-const ACTUAL_SAMPLE_THRESHOLD = 10000; // ms
+const RELOAD_DELAY = 10 * 1000; // ms
+const ACTUAL_SAMPLE_THRESHOLD = 60 * 1000; // ms
 const SAMPLES_LIMIT = 500;
 
 /**
