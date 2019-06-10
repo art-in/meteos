@@ -8,17 +8,23 @@ module.exports = (env, argv) => ({
     filename: 'bundle.js'
   },
   plugins: [
-    new WorkboxPlugin.GenerateSW({
-      // do not use CDN for workbox runtime libs
-      importWorkboxFrom: 'local',
-      swDest: 'sw-cache.js',
-      importsDirectory: 'sw-cache-assets',
+    argv.mode == 'production' &&
+      new WorkboxPlugin.GenerateSW({
+        // do not use CDN for workbox runtime libs
+        importWorkboxFrom: 'local',
+        swDest: 'sw-cache.js',
+        importsDirectory: 'sw-cache-assets',
 
-      // add additional files to cache
-      globDirectory: path.resolve(__dirname, 'src/client/dist'),
-      globPatterns: ['index.html', 'manifest.json', 'favicon-16.png', 'favicon-144.png']
-    })
-  ],
+        // add additional files to cache
+        globDirectory: path.resolve(__dirname, 'src/client/dist'),
+        globPatterns: [
+          'index.html',
+          'manifest.json',
+          'favicon-16.png',
+          'favicon-144.png'
+        ]
+      })
+  ].filter(p => p),
   module: {
     rules: [
       {
