@@ -26,6 +26,21 @@ SCENARIO("getting from unknown endpoint") {
   }
 }
 
+SCENARIO("syncing time with backend") {
+  http_client client(to_string_t(ADDR));
+
+  WHEN("getting time") {
+    auto resp = get(client, "/time");
+
+    THEN("replies current backend time") {
+      REQUIRE(resp.status_code() == status_codes::OK);
+      REQUIRE_THAT(resp.extract_utf8string().get(),
+                   // ISO8601
+                   Matches(R"(\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}\.\d{3}Z)"));
+    }
+  }
+}
+
 SCENARIO("getting samples") {
   http_client client(to_string_t(ADDR));
   del(client, "/samples");

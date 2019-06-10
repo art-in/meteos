@@ -16,12 +16,18 @@ constexpr int DEFAULT_SAMPLES_GET_LIMIT = 1000;
 
 EnvRest::EnvRest(web::uri url, EnvDb &_db, FileLogger logger)
     : Rest{url, logger}, db{_db} {
+  reg_handler(methods::GET, "/time",
+              std::bind(&EnvRest::handle_time_get, this, _1));
   reg_handler(methods::GET, "/samples",
               std::bind(&EnvRest::handle_samples_get, this, _1));
   reg_handler(methods::POST, "/samples",
               std::bind(&EnvRest::handle_samples_post, this, _1, _2));
   reg_handler(methods::DEL, "/samples",
               std::bind(&EnvRest::handle_samples_del, this, _1));
+}
+
+void EnvRest::handle_time_get(http_request req) {
+  req.reply(status_codes::OK, get_now_datetime_iso());
 }
 
 void EnvRest::handle_samples_get(http_request req) {

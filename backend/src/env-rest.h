@@ -13,6 +13,8 @@ class EnvRest : Rest {
  private:
   EnvDb db;
 
+  void handle_time_get(web::http::http_request req);
+
   void handle_samples_get(web::http::http_request);
   void handle_samples_post(web::http::http_request, utility::string_t body);
   void handle_samples_del(web::http::http_request);
