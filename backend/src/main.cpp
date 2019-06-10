@@ -13,8 +13,8 @@ using utility::conversions::to_string_t;
 using utility::conversions::to_utf8string;
 
 constexpr auto URL = "http://0.0.0.0:3000";
-constexpr auto DB_FILE = "/data/env.db";
-constexpr auto LOG_FILE = "/data/env.log";
+constexpr auto DB_FILE = "/data/backend.db";
+constexpr auto LOG_FILE = "/data/backend.log";
 
 int main(int argc, char* argv[]) {
   std::string bin_path{path(argv[0]).parent_path().u8string()};
