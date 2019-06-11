@@ -4,7 +4,8 @@
     "description": "Meteos Frontend",
     "private": true,
     "scripts": {
-        "start": "./scripts/run-backend-mock.sh & ./scripts/run.sh --dev --backend-url=http://localhost:3000"
+        "start": "./scripts/run-backend-mock.sh & ./scripts/run.sh --dev --backend-url=http://localhost:3000",
+        "build": "./scripts/build.sh"
     },
     "dependencies": {
         "@babel/core": "7.4.4",
@@ -39,6 +40,7 @@
         "text-table": "0.2.0",
         "url-loader": "1.1.2",
         "webpack": "4.30.0",
+        "webpack-bundle-analyzer": "3.3.2",
         "webpack-cli": "3.3.2",
         "webpack-dev-server": "3.3.1",
         "workbox-webpack-plugin": "4.3.1",

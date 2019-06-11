@@ -1,3 +1,8 @@
 .vscode
 node_modules
-bundle.js
+
+**/dist/bundle.js
+**/dist/bundle-analyzer-report.html
+**/dist/sw-cache-assets
+**/dist/sw-cache.js
+**/dist/*.ttf

@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = (env, argv) => ({
@@ -15,7 +16,7 @@ module.exports = (env, argv) => ({
         swDest: 'sw-cache.js',
         importsDirectory: 'sw-cache-assets',
 
-        // add additional files to cache
+        // add more files to cache
         globDirectory: path.resolve(__dirname, 'src/client/dist'),
         globPatterns: [
           'index.html',
@@ -23,7 +24,16 @@ module.exports = (env, argv) => ({
           'favicon-16.png',
           'favicon-144.png'
         ]
-      })
+      }),
+    
+    // ignore all locale files of moment.js
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+
+    // uncomment to analyze bundle
+    // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin({
+    //   analyzerMode: 'static',
+    //   reportFilename: 'bundle-analyzer-report.html'
+    // })
   ].filter(p => p),
   module: {
     rules: [
