@@ -30,3 +30,29 @@ assembling on breadboard | <img src="photos/on-breadboard.jpg" width="400" />
 soldering / glueing / drilling / packing in case | <img src="photos/case-internals.jpg" width="400" />
 connecting to usb for charging / debugging | <img src="photos/connecting-usb.jpg" width="400" />
 front side | <img src="photos/on-table.jpg" width="400" /> <br> <img src="photos/on-table-reverse.jpg" width="400" />
+
+---
+
+### Technical Parameters
+
+<span style="display: none"><span>  |  <span style="display: none"><span>
+-- | --
+operating temperature range | 0 ~ 50 °C
+weight | 136 g
+average current | ~ 90 mA
+on-battery life time | ~ 37 hours
+
+---
+
+### Design failures
+
+- short on-battery life time (despite all my attempts #34).  
+    originally i've expected device to work at least 1 week on single battery charge. but it all comes down to this:
+    - esp32 drains considerable amount of current for wifi operations (even in modem sleep mode).
+    - mh-z19 was not designed for low-power consumption as it drains min 5 mA constantly with 100 mA peaks.
+    
+- temperature reading is affected by in-case heating.  
+    esp32 with wifi-on radiates a lot of heat, and a bit more comes from mh-z19.  
+    despite i've drilled a lot of holes on front panel and a side, looks like it's still not enough.  
+    overall it adds up to ~1.8 °C gradually heating up for 4 hours after startup, which needs firmware compensation.
+
