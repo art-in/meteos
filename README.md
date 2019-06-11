@@ -27,3 +27,5 @@ Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32) with databa
 ---
 
 [Sensor device (components, circuit diagram, etc.)](docs/sensor/readme.md)
+
+[Standards for indoor environmental quality](docs/environment-standards.md)
