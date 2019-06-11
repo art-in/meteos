@@ -16,7 +16,7 @@ const defaultProps = {
   sample: new Sample()
 };
 
-export default function Readings({className, sample}) {
+function Readings({className, sample}) {
   const title = sample.time
     ? `Last update: ${moment(sample.time).format('HH:mm:ss')}`
     : '';
@@ -26,34 +26,24 @@ export default function Readings({className, sample}) {
       <Reading
         className={classes.reading}
         type="temperature"
-      
         value={sample.temperature}
-      
       />
       <Reading
         className={classes.reading}
         type="humidity"
-      
         value={sample.humidity}
-      
       />
       <Reading
         className={classes.reading}
         type="pressure"
-        
         value={sample.pressure}
- 
       />
-      <Reading
-        className={classes.reading}
-        type="co2"
-      
-        value={sample.co2}
-      
-      />
+      <Reading className={classes.reading} type="co2" value={sample.co2} />
     </div>
   );
 }
 
 Readings.propTypes = propTypes;
 Readings.defaultProps = defaultProps;
+
+export default React.memo(Readings);

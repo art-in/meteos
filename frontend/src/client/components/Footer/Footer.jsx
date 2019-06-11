@@ -8,8 +8,10 @@ const propTypes = {
   className: PropTypes.string.isRequired
 };
 
-export default function Footer({className}) {
+function Footer({className}) {
   return <div className={cn(className, classes.root)}>meteos</div>;
 }
 
 Footer.propTypes = propTypes;
+
+export default React.memo(Footer);

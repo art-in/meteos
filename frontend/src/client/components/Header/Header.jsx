@@ -12,7 +12,7 @@ const propTypes = {
   onConfigOpen: PropTypes.func.isRequired
 };
 
-export default function Header({className, status, onConfigOpen}) {
+function Header({className, status, onConfigOpen}) {
   return (
     <div className={cn(className, classes.root)}>
       <LoadStatus status={status} />
@@ -28,3 +28,5 @@ export default function Header({className, status, onConfigOpen}) {
 }
 
 Header.propTypes = propTypes;
+
+export default React.memo(Header);

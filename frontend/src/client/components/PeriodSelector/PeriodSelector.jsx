@@ -11,7 +11,7 @@ const propTypes = {
   onPeriodChange: PropTypes.func.isRequired
 };
 
-export default function PeriodSelector({className, period, onPeriodChange}) {
+function PeriodSelector({className, period, onPeriodChange}) {
   return (
     <select
       className={cn(className, classes.root)}
@@ -27,3 +27,5 @@ export default function PeriodSelector({className, period, onPeriodChange}) {
 }
 
 PeriodSelector.propTypes = propTypes;
+
+export default React.memo(PeriodSelector);

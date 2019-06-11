@@ -20,7 +20,7 @@ const propTypes = {
   value: PropTypes.number
 };
 
-export default function Reading({className, type, value}) {
+function Reading({className, type, value}) {
   const title = titles[type];
   const unit = units[type];
   const color = colors[type];
@@ -40,3 +40,5 @@ export default function Reading({className, type, value}) {
 }
 
 Reading.propTypes = propTypes;
+
+export default React.memo(Reading);

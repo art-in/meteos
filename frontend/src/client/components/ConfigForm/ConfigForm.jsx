@@ -11,7 +11,7 @@ const CONNECT_BUTTON_TITLE =
 const CONNECT_BUTTON_TITLE_DONE = 'Connected to Sensor';
 const UPLOAD_BUTTON_TITLE = 'Upload configuration to Sensor';
 
-export default function ConfigForm() {
+function ConfigForm() {
   const {
     isConnected,
     isConnecting,
@@ -174,3 +174,5 @@ export default function ConfigForm() {
     </form>
   );
 }
+
+export default React.memo(ConfigForm);

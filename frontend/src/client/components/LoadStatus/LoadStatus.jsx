@@ -10,7 +10,7 @@ const propTypes = {
   status: PropTypes.oneOf(Object.values(LoadStatusType)).isRequired
 };
 
-export default function LoadStatus({status}) {
+function LoadStatus({status}) {
   let title;
   let icon;
 
@@ -35,3 +35,5 @@ export default function LoadStatus({status}) {
 }
 
 LoadStatus.propTypes = propTypes;
+
+export default React.memo(LoadStatus);

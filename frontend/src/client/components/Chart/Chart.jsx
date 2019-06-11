@@ -27,7 +27,7 @@ const propTypes = {
   onPeriodChange: PropTypes.func.isRequired
 };
 
-export default function Chart({className, samples, period, onPeriodChange}) {
+function Chart({className, samples, period, onPeriodChange}) {
   const now = moment();
 
   const periodStartMs = Number(moment(now).subtract(1, period));
@@ -212,3 +212,5 @@ export default function Chart({className, samples, period, onPeriodChange}) {
 }
 
 Chart.propTypes = propTypes;
+
+export default React.memo(Chart);
