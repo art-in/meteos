@@ -46,7 +46,7 @@ on-battery life time | ~ 37 hours
 
 ### Design failures
 
-- short on-battery life time (despite all my attempts #34).  
+- short on-battery life time (despite all my attempts [#34](https://github.com/art-in/meteos/issues/34)).  
     originally i've expected device to work at least 1 week on single battery charge. but it all comes down to this:
     - esp32 drains considerable amount of current for wifi operations (even in modem sleep mode).
     - mh-z19 was not designed for low-power consumption as it drains min 5 mA constantly with 100 mA peaks.
