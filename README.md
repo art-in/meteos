@@ -10,7 +10,7 @@ Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32) with databa
  - sending readings to database over wifi
  - configuring sensor over bluetooth
  - on-board display to show current readings
- - browser web app to show graphs
+ - browser web app to show history charts
 
 ---
 
@@ -26,4 +26,4 @@ Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32) with databa
 
 ---
 
-[Assembling Sensor device (components, circuit diagram, etc.)](docs/sensor/readme.md)
+[Sensor device (components, circuit diagram, etc.)](docs/sensor/readme.md)

@@ -2,7 +2,7 @@ Meteos Sensor
 
 Firmware for ESP32 microcontroller that periodically reads environment data from sensors (BME280, MH-Z19) and sends it to Backend over wifi.
 
-[Assembling Sensor device (components, circuit diagram, etc.)](../docs/sensor/readme.md)
+[Sensor device (components, circuit diagram, etc.)](../docs/sensor/readme.md)
 
 ---
 
