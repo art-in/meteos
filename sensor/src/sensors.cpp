@@ -74,6 +74,7 @@ Sample Sensors::take_sample() {
 
   bme.takeForcedMeasurement();
 
+  // TODO: compensate in-case heat
   s.temperature = bme.readTemperature();
   s.humidity = bme.readHumidity();
   s.pressure = bme.readPressure() * PASCAL_TO_MECURY_MM;

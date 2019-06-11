@@ -33,12 +33,6 @@ function Chart({className, samples, period, onPeriodChange}) {
   const periodStartMs = Number(moment(now).subtract(1, period));
   const periodEndMs = Number(now);
 
-  // TODO: remove when recharts bug is fixed
-  // https://github.com/recharts/recharts/issues/1493
-  if (!samples.length) {
-    samples = [new Sample(1, 1, 1, 1, 1)];
-  }
-
   const formatLabel = useCallback(
     time => moment(time).format('dddd, MMMM D, HH:mm:ss'),
     []
@@ -143,19 +137,22 @@ function Chart({className, samples, period, onPeriodChange}) {
           <YAxis yAxisId="pressure" type="number" domain={[730, 770]} hide />
           <YAxis yAxisId="co2" type="number" domain={[400, 1300]} hide />
 
-          <Tooltip
-            isAnimationActive={false}
-            labelFormatter={formatLabel}
-            labelStyle={{
-              paddingBottom: 10,
-              color: '#808080'
-            }}
-            contentStyle={{
-              backgroundColor: '#1f1d1d',
-              border: '2px solid #808080'
-            }}
-            itemStyle={{paddingRight: 20}}
-          />
+          {/* hide tooltip if no samples to avoid blinking line on the left side */}
+          {samples.length && (
+            <Tooltip
+              isAnimationActive={false}
+              labelFormatter={formatLabel}
+              labelStyle={{
+                paddingBottom: 10,
+                color: '#808080'
+              }}
+              contentStyle={{
+                backgroundColor: '#1f1d1d',
+                border: '2px solid #808080'
+              }}
+              itemStyle={{paddingRight: 20}}
+            />
+          )}
 
           <Area
             dataKey="co2"
