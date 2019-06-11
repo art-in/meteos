@@ -40,6 +40,7 @@ Prerequisites: (1) [docker](https://www.docker.com/).
 ```
 # download image from docker hub and run it (set params first)
 docker run -di \
+  --restart unless-stopped \
   -p <port>:3001 \
   --mount type=bind,src=<log folder>,dst=/opt/log \
   --mount type=bind,src=<cert folder>,dst=/opt/cert \
