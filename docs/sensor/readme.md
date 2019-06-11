@@ -44,7 +44,7 @@ on-battery life time | ~ 37 hours
 
 ---
 
-### Design failures
+### Design Failures
 
 - short on-battery life time (despite all my attempts [#34](https://github.com/art-in/meteos/issues/34)).  
     originally i've expected device to work at least 1 week on single battery charge. but it all comes down to this:
