@@ -46,13 +46,13 @@ on-battery life time | ~ 37 hours
 
 ### Design Failures
 
-- short on-battery life time (despite all my attempts [#34](https://github.com/art-in/meteos/issues/34)).  
+- short on-battery life time (despite all improvements [#34](https://github.com/art-in/meteos/issues/34)).  
     originally i've expected device to work at least 1 week on single battery charge. but it all comes down to this:
     - esp32 drains considerable amount of current for wifi operations (even in modem sleep mode).
     - mh-z19 was not designed for low-power consumption as it drains min 5 mA constantly with 100 mA peaks.
     
-- temperature reading is affected by in-case heating.  
+- temperature reading is affected by in-case self heating.  
     esp32 with wifi-on radiates a lot of heat, and a bit more comes from mh-z19.  
     despite i've drilled a lot of holes on front panel and a side, looks like it's still not enough.  
-    overall it adds up to ~1.8 °C gradually heating up for 4 hours after startup, which needs firmware compensation.
+    overall mistake is ~ +1.6 °C (gradually heating up for 2 hours after startup), which needs firmware compensation.
 
