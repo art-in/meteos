@@ -51,8 +51,8 @@ on-battery life time | ~ 37 hours
     - esp32 drains considerable amount of current for wifi operations (even in modem sleep mode).
     - mh-z19 was not designed for low-power consumption as it drains min 5 mA constantly with 100 mA peaks.
     
-- temperature reading is affected by in-case self heating.  
-    esp32 with wifi-on radiates a lot of heat, and a bit more comes from mh-z19.  
+- temperature reading is affected by case self heating.  
+    esp32 radiates most of the heat, and some more comes from mh-z19 and battery.  
     despite i've drilled a lot of holes on front panel and a side, looks like it's still not enough.  
-    overall mistake is ~ +1.6 °C (gradually heating up for 2 hours after startup), which needs firmware compensation.
+    overall mistake is ~ +2 °C (gradually heating up for 1-2 hours after startup), which needs [firmware compensation](https://github.com/art-in/meteos/commit/2b7095b54528057cdad4de52b92796aa3bcfb0cc).
 
