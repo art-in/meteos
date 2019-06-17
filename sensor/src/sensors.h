@@ -19,4 +19,5 @@ class Sensors {
 
   void init_bme();
   void init_mhz();
+  float compensate_self_heating(float);
 };

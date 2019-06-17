@@ -74,8 +74,7 @@ Sample Sensors::take_sample() {
 
   bme.takeForcedMeasurement();
 
-  // TODO: compensate in-case heat
-  s.temperature = bme.readTemperature();
+  s.temperature = compensate_self_heating(bme.readTemperature());
   s.humidity = bme.readHumidity();
   s.pressure = bme.readPressure() * PASCAL_TO_MECURY_MM;
 
@@ -91,3 +90,26 @@ Sample Sensors::take_sample() {
 }
 
 Sample Sensors::get_latest_sample() { return latest_sample; }
+
+// compensates temperature reading mistake due to case self heating.
+//
+// esp32 radiates most of the heat, and some more comes from mh-z19 and battery.
+// case is heating up gradually (mistake grows) for 1-2 hours after startup.
+// mistake is different for usb and battery power supply (battery heats up).
+//
+// manual tests comparing Sensor reading with external not encased bme280:
+// - powering through esp32 dev board usb:
+// -- ext.bme280 = 23 °C,   Sensor = 25.2 °C, mistake = +2.2 °C
+// -- ext.bme280 = 26.2 °C, Sensor = 27.8 °C, mistake = +1.6 °C
+// - powering with battery:
+// -- ext.bme280 = 22.5 °C, Sensor = 25.5 °C, mistake = +3 °C
+// -- ext.bme280 = 26 °C,   Sensor = 28.2 °C, mistake = +2.2 °C
+//
+// compensating mistake for usb power supply, since unable to check power
+// source and usb is primary one. for simplicity assuming that relation
+// is linear (though it's not). using linear equation basing on two readings
+// from manual tests.
+float Sensors::compensate_self_heating(float raw_temperature) {
+  double mistake = 8.0154 - raw_temperature * 0.2308;
+  return raw_temperature - mistake;
+}
