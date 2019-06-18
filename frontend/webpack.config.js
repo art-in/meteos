@@ -22,7 +22,7 @@ module.exports = (env, argv) => ({
           'index.html',
           'manifest.json',
           'favicon-16.png',
-          'favicon-144.png'
+          'favicon-128.png'
         ]
       }),
     
