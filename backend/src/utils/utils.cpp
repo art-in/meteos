@@ -27,11 +27,18 @@ void log_service_start_failed(FileLogger logger, std::exception& e) {
              std::string{"Failed to start service: "} + e.what());
 }
 
+// Freezes main thread until cin is closed.
+// Other solutions does not work:
+// - while(1), promise/wait - main function is not finished, resource classes
+//                            not cleaned up, so network port is not released.
+// - signal, sigaction - do not catch termination signals, so unable to cleanup
+//                        resource classes.
 void freeze_thread_until_cin_closed() {
   std::string s;
   std::getline(std::cin, s);
 }
 
+// Returns current time in ISO8601 format and UTC Zulu timezone.
 std::string get_now_datetime_iso() {
   using namespace std::chrono;
 
@@ -63,11 +70,15 @@ std::string query(http_request req, std::string key) {
   return to_utf8string(value);
 }
 
-int query(web::http::http_request req, std::string key, int defaultVal) {
+int query(web::http::http_request req, std::string key, int default_val) {
   std::string str = query(req, key);
-  return str == "" ? defaultVal : std::stoi(str);
+  return str == "" ? default_val : std::stoi(str);
 }
 
+// Visits N items from target array.
+// - ensures visited items are evenly distributed along the target
+// - ensures first and last items visited
+// - ensures sequence of visited items preserved
 template <class T>
 void distribute_evenly(int n, std::vector<T> target,
                        std::function<void(T&)> visit) {

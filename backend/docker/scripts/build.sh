@@ -5,7 +5,7 @@
 # options:
 # --clean - recreates docker image with build tools even if it already exists.
 #           use it when changing build tools or project dependencies.
-# --test  - additionaly builds tests.
+# --test  - additionally builds tests.
 
 PROJECT_NAME=meteos-backend
 

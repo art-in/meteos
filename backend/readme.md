@@ -10,7 +10,7 @@ Build & run in docker
 Prerequisites: (1) [docker](https://www.docker.com/), (2) git, (3) unix shell (e.g. bash).
 
 ```
-git clone https://github.com/artin-phares/meteos
+git clone https://github.com/art-in/meteos
 cd ./meteos/backend
 
 ./docker/scripts/build.sh    # build inside container
@@ -29,13 +29,13 @@ On linux, if docker requires `sudo` - setup it to run without `sudo` ([instructi
 
 ---
 
-Run prebuild docker
+Run prebuild docker image
 ---
 
 Prerequisites: (1) [docker](https://www.docker.com/).
 
 ```
-# download image from docker hub and run it (set port and folder path to save database in)
+# download image from docker hub and run it (set params first)
 docker run -di \
     --restart unless-stopped \
     -p <port>:3000 \
@@ -44,4 +44,4 @@ docker run -di \
 ```
 
 Notes:  
-Database folder path should be (1) absolute, (2) exist, (3) windows format: "/d/my/folder/".
+Database folder path should (1) exist, (2) be absolute, (3) windows format: "/d/my/folder/".
