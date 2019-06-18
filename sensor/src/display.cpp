@@ -44,7 +44,7 @@ void Display::draw_next_reading(const Sample& sample) {
   } else {
     String title;
     String value;
-    String value_postfix;
+    String value_units;
 
     is_reading_shown_ = true;
 
@@ -52,37 +52,34 @@ void Display::draw_next_reading(const Sample& sample) {
       case 0:
         title = "temperature";
         value = String(sample.temperature);
-        value_postfix = "C";
+        value_units = "C";
         break;
       case 1:
         title = "humidity";
         value = String(sample.humidity);
-        value_postfix = "%";
+        value_units = "%";
         break;
       case 2:
         title = "pressure";
         value = String(sample.pressure);
-        value_postfix = "mm";
+        value_units = "mm";
         break;
       case 3:
         title = "co2";
         value = String(sample.co2);
-        value_postfix = "ppm";
+        value_units = "ppm";
         break;
     }
 
     display.clearBuffer();
     display.setFontPosTop();
 
-    // TODO: update fonts (profont)
     display.setFont(u8g2_font_t0_11_mf);
     display.drawStr(0, 0, title.c_str());
+    display.drawStr(100, 33, value_units.c_str());
 
     display.setFont(u8g2_font_inb19_mf);
     display.drawStr(0, 25, value.c_str());
-
-    display.setFont(u8g2_font_t0_11_mf);
-    display.drawStr(100, 33, value_postfix.c_str());
 
     display.sendBuffer();
   }
@@ -106,7 +103,7 @@ void Display::draw_log(String str) {
   display.clearBuffer();
   display.setFontPosTop();
 
-  display.setFont(u8g2_font_5x7_mf);
+  display.setFont(u8g2_font_profont10_mf);
 
   // randomize y-position to avoid OLED pixels burnout.
   display.drawStr(0, random(59), str.c_str());

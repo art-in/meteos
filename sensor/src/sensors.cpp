@@ -5,8 +5,8 @@
 #include "utils.h"
 
 constexpr int MHZ_BAUDRATE = 9600;
-constexpr double PASCAL_TO_MECURY_MM = 0.00750062;
-constexpr auto CO2_WARMING_READ_PERIOD = std::chrono::milliseconds{30000};
+constexpr double PASCAL_TO_MERCURY_MM = 0.00750062;
+constexpr auto CO2_WARMING_PERIOD = std::chrono::seconds{30};
 
 void Sensors::init() {
   init_bme();
@@ -62,7 +62,7 @@ void Sensors::init_mhz() {
         break;
       }
 
-      delay(CO2_WARMING_READ_PERIOD.count());
+      delay(CO2_WARMING_PERIOD.count());
     }
   }
 }
@@ -76,7 +76,7 @@ Sample Sensors::take_sample() {
 
   s.temperature = compensate_self_heating(bme.readTemperature());
   s.humidity = bme.readHumidity();
-  s.pressure = bme.readPressure() * PASCAL_TO_MECURY_MM;
+  s.pressure = bme.readPressure() * PASCAL_TO_MERCURY_MM;
 
   s.co2 = mhz.getCO2(true, true);
 

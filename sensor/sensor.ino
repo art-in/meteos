@@ -40,11 +40,8 @@ void setup() {
   btn.init(PIN_BUTTON, on_button_state_changed);
   wifi.init(config.wifi_ssid(), config.wifi_pass(), config.backend_host(),
             config.backend_port());
-
   wifi.connect();
 
-  // delay logo
-  delay(1000);
   display.clear();
 }
 

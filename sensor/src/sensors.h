@@ -3,17 +3,19 @@
 
 #include "sample.h"
 
+constexpr int UART_NUMBER = 2;
+
 class Sensors {
  public:
-  Sensors() : mhz_serial{2} {};
+  Sensors() : mhz_serial{UART_NUMBER} {};
 
   void init();
   Sample take_sample();
   Sample get_latest_sample();
 
  private:
-  Adafruit_BME280 bme;  // I2C
-  MHZ19 mhz;            // UART
+  Adafruit_BME280 bme;
+  MHZ19 mhz;
   HardwareSerial mhz_serial;
   Sample latest_sample;
 

@@ -58,6 +58,7 @@ class CharacteristicCallbacks : public BLECharacteristicCallbacks {
     }
     METEOS_LOG_LN(char_ptr->getValue().c_str());
   };
+
   void onWrite(BLECharacteristic *char_ptr) {
     switch (type) {
       case CharacteristicType::wifi_ssid:
@@ -147,5 +148,7 @@ void RadioBT::start_advertising() {
 void RadioBT::stop_advertising() {
   METEOS_SCOPED_LOGGER("bt: stop advertising");
 
+  // TODO: find workaround to stop advertising as this does not really work.
+  // https://github.com/nkolban/esp32-snippets/issues/797
   advertising_ptr->stop();
 }
