@@ -33,7 +33,11 @@ if [[ $ARG_DEV ]] ; then
     ps -ef | grep '/src/server/server.js' | grep -v grep | awk '{print $2}' | xargs -r kill -9
 
     npx webpack-dev-server --config $(pwd)/webpack.config.js --stdin=false --mode=development &
-    NODE_ENV=development npx nodemon --legacy-watch --watch $(pwd)/src/server $(pwd)/src/server/server.js $ARG_BACKEND_URL
+    NODE_ENV=development npx nodemon \
+        --legacy-watch \
+        --watch $(pwd)/src/server \
+        $(pwd)/src/server/server.js \
+        $ARG_BACKEND_URL
 else
     mkdir -p /opt/log
     node $(pwd)/src/server/server.js $ARG_BACKEND_URL $ARG_TLS_KEY $ARG_TLS_CERT

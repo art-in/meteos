@@ -10,7 +10,7 @@ Build & run in docker
 Prerequisites: (1) [docker](https://www.docker.com/), (2) git, (3) unix shell (e.g. bash).
 
 ```
-git clone https://github.com/artin-phares/meteos
+git clone https://github.com/art-in/meteos
 cd meteos/frontend
 
 ./docker/scripts/build.sh        # build inside container
@@ -20,7 +20,7 @@ cd meteos/frontend
                                  # --backend-url (required)
                                  # --dev - rebuild on src/ changes
                                  # --log-folder - folder to drop log file to
-                                 # --tls-folder - folder with tls certificate
+                                 # --tls-folder - folder to read tls certificate from
                                  # --tls-key - file name of certificate private key
                                  # --tls-cert - file name of certificate
 

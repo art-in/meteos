@@ -6,7 +6,7 @@
 # --backend-url - (required) url of backend service to fetch environment data from
 # --dev         - development mode (rebuild on src/ changes, skip optimizations, etc.)
 # --log-folder  - folder to drop log file to
-# --tls-folder  - folder with tls certificate
+# --tls-folder  - folder to read tls certificate from
 # --tls-key     - file name of certificate private key 
 # --tls-cert    - file name of certificate
 
