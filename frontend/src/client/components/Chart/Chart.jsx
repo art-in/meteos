@@ -132,10 +132,10 @@ function Chart({className, samples, period, onPeriodChange}) {
             domain={[periodStartMs, periodEndMs]}
           />
 
-          <YAxis yAxisId="temperature" type="number" domain={[25, 30]} hide />
-          <YAxis yAxisId="humidity" type="number" domain={[30, 60]} hide />
-          <YAxis yAxisId="pressure" type="number" domain={[730, 770]} hide />
-          <YAxis yAxisId="co2" type="number" domain={[400, 1300]} hide />
+          <YAxis yAxisId="temperature" type="number" domain={[18, 28]} hide />
+          <YAxis yAxisId="humidity" type="number" domain={[15, 60]} hide />
+          <YAxis yAxisId="pressure" type="number" domain={[740, 780]} hide />
+          <YAxis yAxisId="co2" type="number" domain={[400, 1500]} hide />
 
           {/* hide tooltip if no samples to avoid blinking line on the left side */}
           {samples.length && (
@@ -155,28 +155,16 @@ function Chart({className, samples, period, onPeriodChange}) {
           )}
 
           <Area
-            dataKey="co2"
-            yAxisId="co2"
+            dataKey="temperature"
+            yAxisId="temperature"
             type="basis"
             isAnimationActive={false}
-            fill="url(#gradientCO2)"
+            fill="url(#gradientTemperature)"
             fillOpacity={1}
-            dot={{stroke: colors.co2.primary, r: 0.8}}
+            dot={{stroke: colors.temperature.primary, r: 0.8}}
             activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.co2.secondary}
-            unit={' ' + units.co2}
-          />
-          <Area
-            dataKey="pressure"
-            yAxisId="pressure"
-            type="basis"
-            isAnimationActive={false}
-            fill="url(#gradientPressure)"
-            fillOpacity={1}
-            dot={{stroke: colors.pressure.primary, r: 0.8}}
-            activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.pressure.secondary}
-            unit={' ' + units.pressure}
+            stroke={colors.temperature.secondary}
+            unit={' ' + units.temperature}
           />
           <Area
             dataKey="humidity"
@@ -191,16 +179,28 @@ function Chart({className, samples, period, onPeriodChange}) {
             unit={' ' + units.humidity}
           />
           <Area
-            dataKey="temperature"
-            yAxisId="temperature"
+            dataKey="pressure"
+            yAxisId="pressure"
             type="basis"
             isAnimationActive={false}
-            fill="url(#gradientTemperature)"
+            fill="url(#gradientPressure)"
             fillOpacity={1}
-            dot={{stroke: colors.temperature.primary, r: 0.8}}
+            dot={{stroke: colors.pressure.primary, r: 0.8}}
             activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.temperature.secondary}
-            unit={' ' + units.temperature}
+            stroke={colors.pressure.secondary}
+            unit={' ' + units.pressure}
+          />
+          <Area
+            dataKey="co2"
+            yAxisId="co2"
+            type="basis"
+            isAnimationActive={false}
+            fill="url(#gradientCO2)"
+            fillOpacity={1}
+            dot={{stroke: colors.co2.primary, r: 0.8}}
+            activeDot={{stroke: '#fff', r: 1.5}}
+            stroke={colors.co2.secondary}
+            unit={' ' + units.co2}
           />
         </AreaChart>
       </ResponsiveContainer>
