@@ -15,6 +15,7 @@ module.exports = (env, argv) => ({
         importWorkboxFrom: 'local',
         swDest: 'sw-cache.js',
         importsDirectory: 'sw-cache-assets',
+        skipWaiting: true,
 
         // add more files to cache
         globDirectory: path.resolve(__dirname, 'src/client/dist'),
