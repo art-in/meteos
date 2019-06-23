@@ -2,7 +2,7 @@ import React, {useState, useCallback} from 'react';
 import cn from 'classnames';
 
 import useSamplesLoader from 'hooks/use-samples-loader';
-import PeriodType from 'utils/PeriodType';
+import * as preferences from 'utils/preferences';
 import Header from '../Header';
 import Readings from '../Readings';
 import Chart from '../Chart';
@@ -15,11 +15,12 @@ require('./shared/global.css');
 require('./shared/fonts.css');
 
 export default function App() {
-  const [chartPeriod, setChartPeriod] = useState(PeriodType.hour);
+  const [chartPeriod, setChartPeriod] = useState(preferences.chartPeriod());
   const [isConfigOpened, setIsConfigOpened] = useState(false);
   const {loadStatus, samples, actualSample} = useSamplesLoader(chartPeriod);
 
   const onChartPeriodChange = useCallback(period => {
+    preferences.chartPeriod(period);
     setChartPeriod(period);
   }, []);
 
