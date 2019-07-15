@@ -62,7 +62,7 @@ void Sensors::init_mhz() {
         break;
       }
 
-      delay(CO2_WARMING_PERIOD.count());
+      delay(std::chrono::milliseconds{CO2_WARMING_PERIOD}.count());
     }
   }
 }
