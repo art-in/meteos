@@ -7,7 +7,7 @@ constexpr auto PREF_KEY_WIFI_SSID = "wifi_ssid";
 constexpr auto PREF_KEY_WIFI_PASS = "wifi_pass";
 constexpr auto PREF_KEY_BACKEND_HOST = "backend_host";
 constexpr auto PREF_KEY_BACKEND_PORT = "backend_port";
-constexpr auto PREF_KEY_SAMPLE_DELAY = "sample_delay_sec";
+constexpr auto PREF_KEY_SAMPLE_DELAY = "sample_delay";
 
 void Config::init() {
   METEOS_SCOPED_LOGGER("config: init");
