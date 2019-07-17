@@ -5,7 +5,10 @@ ENTRYPOINT ["bash", "/opt/project/scripts/run.sh"]
 
 # install tools
 RUN apt-get update
-RUN apt-get install -y curl xz-utils
+RUN apt-get install -y curl xz-utils git
+
+# auto convert line endings (CRLF to LF) if on windows host
+RUN git config --global core.autocrlf true
 
 # install nodejs (through direct link since apt-get one is old)
 RUN mkdir -p /opt/node
