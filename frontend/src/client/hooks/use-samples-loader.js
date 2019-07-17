@@ -7,18 +7,19 @@ import * as api from 'utils/api';
 
 const RELOAD_DELAY = 10 * 1000; // ms
 const ACTUAL_SAMPLE_THRESHOLD = 60 * 1000; // ms
-const SAMPLES_LIMIT = 500;
 
 /**
  * Loads samples periodically for specified period.
  *
  * @param {string} period - last hour/week/month/etc.
+ * @param {number} samplesLimit
  */
-export default function useSamplesLoader(period) {
+export default function useSamplesLoader(period, samplesLimit) {
   const [loadStatus, setLoadStatus] = useState(LoadStatusType.connected);
   const [loadedSamples, setLoadedSamples] = useState([]);
   const [actualSample, setActualSample] = useState();
   const prevPeriod = usePrevious(period);
+  const prevSamplesLimit = usePrevious(samplesLimit);
 
   useEffect(() => {
     async function load(isCleanReload) {
@@ -41,7 +42,7 @@ export default function useSamplesLoader(period) {
 
       let samples;
       try {
-        samples = await api.getSamples({from, limit: SAMPLES_LIMIT});
+        samples = await api.getSamples({from, limit: samplesLimit});
       } catch (e) {
         setLoadStatus(LoadStatusType.disconnected);
         setActualSample();
@@ -61,7 +62,7 @@ export default function useSamplesLoader(period) {
       // we need to do it even though we already limiting api response, since
       // target period may have "holes" with no samples, so we may receive
       // over-loaded sub-periods.
-      const gapMs = periodDurationMs / SAMPLES_LIMIT;
+      const gapMs = periodDurationMs / samplesLimit;
       let prevSample = isCleanReload ? null : prevLatestSample;
       samples = samples.filter(sample => {
         if (!prevSample || sample.timeMs - prevSample.timeMs >= gapMs) {
@@ -82,9 +83,9 @@ export default function useSamplesLoader(period) {
 
       setLoadedSamples(samples);
 
-      if (samples.length > SAMPLES_LIMIT) {
+      if (samples.length > samplesLimit) {
         console.warn(
-          `Samples count exceeded limit (${SAMPLES_LIMIT}): ${samples.length}`
+          `Samples count exceeded limit (${samplesLimit}): ${samples.length}`
         );
       }
 
@@ -102,14 +103,14 @@ export default function useSamplesLoader(period) {
 
     let timerId;
 
-    if (period != prevPeriod) {
+    if (period != prevPeriod || samplesLimit != prevSamplesLimit) {
       load(true);
     } else {
       timerId = setTimeout(load, RELOAD_DELAY);
     }
 
     return () => clearTimeout(timerId);
-  }, [period, prevPeriod, loadedSamples]);
+  }, [loadedSamples, period, prevPeriod, samplesLimit, prevSamplesLimit]);
 
   return {loadStatus, samples: loadedSamples, actualSample};
 }

@@ -1,6 +1,7 @@
 import React, {useState, useCallback} from 'react';
 import cn from 'classnames';
 
+import useSamplesLimit from 'hooks/use-samples-limit';
 import useSamplesLoader from 'hooks/use-samples-loader';
 import * as preferences from 'utils/preferences';
 import Header from '../Header';
@@ -17,7 +18,11 @@ require('./shared/fonts.css');
 export default function App() {
   const [chartPeriod, setChartPeriod] = useState(preferences.chartPeriod());
   const [isConfigOpened, setIsConfigOpened] = useState(false);
-  const {loadStatus, samples, actualSample} = useSamplesLoader(chartPeriod);
+  const {samplesLimit} = useSamplesLimit();
+  const {loadStatus, samples, actualSample} = useSamplesLoader(
+    chartPeriod,
+    samplesLimit
+  );
 
   const onChartPeriodChange = useCallback(period => {
     preferences.chartPeriod(period);
