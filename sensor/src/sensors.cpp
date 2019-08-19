@@ -99,17 +99,21 @@ Sample Sensors::get_latest_sample() { return latest_sample; }
 //
 // manual tests comparing Sensor reading with external not encased bme280:
 // - powering through esp32 dev board usb:
-// -- ext.bme280 = 23 °C,   Sensor = 25.2 °C, mistake = +2.2 °C
+// -- ext.bme280 = 23* °C,  Sensor = 25.2 °C, mistake = +2.2 °C
 // -- ext.bme280 = 26.2 °C, Sensor = 27.8 °C, mistake = +1.6 °C
+// -- ext.bme280 = 28.6 °C, Sensor = 30.4 °C, mistake = +1.8 °C
 // - powering with battery:
-// -- ext.bme280 = 22.5 °C, Sensor = 25.5 °C, mistake = +3 °C
-// -- ext.bme280 = 26 °C,   Sensor = 28.2 °C, mistake = +2.2 °C
+// -- ext.bme280 = 22.5* °C, Sensor = 25.5 °C, mistake = +3 °C
+// -- ext.bme280 = 26 °C,    Sensor = 28.2 °C, mistake = +2.2 °C
+//
+// TODO: (*) low temperatures were simulated by placing ice near sensor.
+//           test in natural cold environment (#56).
 //
 // compensating mistake for usb power supply, since unable to check power
 // source and usb is primary one. for simplicity assuming that relation
 // is linear (though it's not). using linear equation basing on two readings
 // from manual tests.
 float Sensors::compensate_self_heating(float raw_temperature) {
-  double mistake = 8.0154 - raw_temperature * 0.2308;
+  double mistake = 3.6385 - 0.0769 * raw_temperature;
   return raw_temperature - mistake;
 }
