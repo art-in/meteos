@@ -63,6 +63,15 @@ std::string get_now_datetime_iso() {
   return oss.str();
 }
 
+std::string ms_since(std::chrono::time_point<std::chrono::steady_clock> start) {
+  using namespace std::chrono;
+
+  auto now = steady_clock::now();
+  auto ms = duration_cast<milliseconds>(now - start).count();
+
+  return std::to_string(ms) + "ms";
+}
+
 std::string query(http_request req, std::string key) {
   auto k = to_string_t(key);
   auto query = web::uri::decode(req.relative_uri().query());

@@ -1,9 +1,11 @@
 #include <cpprest/http_client.h>
 #include <algorithm>
+#include <chrono>
 #include <exception>
 #include <string>
 
 #include "rest.h"
+#include "utils.h"
 
 using std::placeholders::_1;
 using utility::string_t;
@@ -24,6 +26,8 @@ void Rest::reg_handler(web::http::method method, std::string path,
 }
 
 void Rest::handle_request(http_request req) {
+  auto start = std::chrono::steady_clock::now();
+
   string_t body = req.extract_string().get();
 
   std::string log_record = to_utf8string(req.remote_address()) + " - " +
@@ -40,13 +44,16 @@ void Rest::handle_request(http_request req) {
 
     if (handler_it != handlers.end()) {
       (*handler_it).fn(req, body);
-      logger.log(LogLevel::INFO, log_record);
+
+      logger.log(LogLevel::INFO, log_record + " - " + ms_since(start));
     } else {
       req.reply(status_codes::NotFound);
-      logger.log(LogLevel::WARN, log_record + " - NOT FOUND");
+      logger.log(LogLevel::WARN,
+                 log_record + " - NOT FOUND - " + ms_since(start));
     }
   } catch (std::exception &e) {
     req.reply(status_codes::InternalError);
-    logger.log(LogLevel::ERROR, log_record + " - " + e.what());
+    logger.log(LogLevel::ERROR,
+               log_record + " - " + e.what() + " - " + ms_since(start));
   }
 }

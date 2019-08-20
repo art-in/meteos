@@ -12,6 +12,7 @@ void log_service_start_failed(FileLogger, std::exception&);
 void freeze_thread_until_cin_closed();
 
 std::string get_now_datetime_iso();
+std::string ms_since(std::chrono::time_point<std::chrono::steady_clock> start);
 
 std::string query(web::http::http_request req, std::string key);
 int query(web::http::http_request req, std::string key, int defaultVal);
