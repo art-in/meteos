@@ -2,5 +2,7 @@ export default {
   minute: 'minute',
   hour: 'hour',
   day: 'day',
-  week: 'week'
+  week: 'week',
+  month: 'month',
+  year: 'year'
 };

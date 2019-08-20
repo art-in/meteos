@@ -22,6 +22,8 @@ function PeriodSelector({className, period, onPeriodChange}) {
       <option value={PeriodType.hour}>last hour</option>
       <option value={PeriodType.day}>last day</option>
       <option value={PeriodType.week}>last week</option>
+      <option value={PeriodType.month}>last month</option>
+      <option value={PeriodType.year}>last year</option>
     </select>
   );
 }

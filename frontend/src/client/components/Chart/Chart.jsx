@@ -48,7 +48,11 @@ function Chart({className, samples, period, onPeriodChange}) {
         case 'day':
           return moment(time).format('HH:mm:ss');
         case 'week':
-          return moment(time).format('MMMM D, HH:mm:ss');
+          return moment(time).format('dddd, MMMM D');
+        case 'month':
+          return moment(time).format('MMMM D');
+        case 'year':
+          return moment(time).format('MMMM');
         default:
           throw Error(`Unknown period '${period}'`);
       }
