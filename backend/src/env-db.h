@@ -14,6 +14,6 @@ class EnvDb : Db {
   ~EnvDb() { sqlite3_close(db); };
 
   void add_sample(Sample sample);
-  std::vector<Sample> get_samples(std::string from, std::string to);
+  std::vector<Sample> get_samples(std::string from, std::string to, int limit);
   void delete_samples();
 };

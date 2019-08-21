@@ -37,10 +37,10 @@ void EnvRest::handle_samples_get(http_request req) {
   auto to = query(req, "to");
   auto limit = query(req, "limit", DEFAULT_SAMPLES_GET_LIMIT);
 
-  samples = db.get_samples(from, to);
+  samples = db.get_samples(from, to, limit);
   auto samples_json = json::value::array();
 
-  distribute_evenly<Sample>(limit, samples, [&](Sample &sample) {
+  for (auto sample : samples) {
     auto sample_obj = json::value::object();
 
     sample_obj[U("u")] = json::value::string(to_string_t(sample.datetime));
@@ -50,7 +50,7 @@ void EnvRest::handle_samples_get(http_request req) {
     sample_obj[U("c")] = sample.co2;
 
     samples_json[samples_json.size()] = sample_obj;
-  });
+  }
 
   req.reply(status_codes::OK, samples_json);
 };

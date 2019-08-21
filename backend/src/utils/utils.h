@@ -16,7 +16,3 @@ std::string ms_since(std::chrono::time_point<std::chrono::steady_clock> start);
 
 std::string query(web::http::http_request req, std::string key);
 int query(web::http::http_request req, std::string key, int defaultVal);
-
-template <class T>
-void distribute_evenly(int n, std::vector<T> target,
-                       std::function<void(T&)> visit);
