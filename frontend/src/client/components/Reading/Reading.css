@@ -9,6 +9,11 @@
 
   border-width: 1px;
   border-style: solid;
+
+  border-color: #d3d3d3;
+  background-color: #808080;
+
+  cursor: pointer;
 }
 
 .title {

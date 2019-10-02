@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -17,18 +17,35 @@ const propTypes = {
   className: PropTypes.string.isRequired,
   type: PropTypes.oneOf(['temperature', 'humidity', 'pressure', 'co2'])
     .isRequired,
-  value: PropTypes.number
+  isActive: PropTypes.bool.isRequired,
+  value: PropTypes.number,
+  onReadingActivationChange: PropTypes.func.isRequired
 };
 
-function Reading({className, type, value}) {
+function Reading({
+  className,
+  type,
+  isActive,
+  value,
+  onReadingActivationChange
+}) {
   const title = titles[type];
   const unit = units[type];
   const color = colors[type];
 
+  const onClick = useCallback(() => {
+    onReadingActivationChange(type, !isActive);
+  }, [isActive, onReadingActivationChange, type]);
+
   return (
     <div
       className={cn(className, classes.root, classes[type])}
-      style={{borderColor: color.primary, backgroundColor: color.secondary}}
+      style={
+        isActive
+          ? {borderColor: color.primary, backgroundColor: color.secondary}
+          : null
+      }
+      onClick={onClick}
     >
       <div className={classes.title}>{title}</div>
       <div className={classes.valueContainer}>

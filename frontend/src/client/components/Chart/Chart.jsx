@@ -23,11 +23,24 @@ const propTypes = {
   className: PropTypes.string.isRequired,
   samples: PropTypes.arrayOf(PropTypes.instanceOf(Sample)).isRequired,
   period: PropTypes.oneOf(Object.values(PeriodType)).isRequired,
+  isTemperatureActive: PropTypes.bool.isRequired,
+  isHumidityActive: PropTypes.bool.isRequired,
+  isPressureActive: PropTypes.bool.isRequired,
+  isCO2Active: PropTypes.bool.isRequired,
 
   onPeriodChange: PropTypes.func.isRequired
 };
 
-function Chart({className, samples, period, onPeriodChange}) {
+function Chart({
+  className,
+  samples,
+  period,
+  isTemperatureActive,
+  isHumidityActive,
+  isPressureActive,
+  isCO2Active,
+  onPeriodChange
+}) {
   const now = moment();
 
   const periodStartMs = Number(moment(now).subtract(1, period));
@@ -158,54 +171,62 @@ function Chart({className, samples, period, onPeriodChange}) {
             />
           )}
 
-          <Area
-            dataKey="temperature"
-            yAxisId="temperature"
-            type="basis"
-            isAnimationActive={false}
-            fill="url(#gradientTemperature)"
-            fillOpacity={1}
-            dot={{stroke: colors.temperature.primary, r: 0.8}}
-            activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.temperature.secondary}
-            unit={' ' + units.temperature}
-          />
-          <Area
-            dataKey="humidity"
-            yAxisId="humidity"
-            type="basis"
-            isAnimationActive={false}
-            fill="url(#gradientHumidity)"
-            fillOpacity={1}
-            dot={{stroke: colors.humidity.primary, r: 0.8}}
-            activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.humidity.secondary}
-            unit={' ' + units.humidity}
-          />
-          <Area
-            dataKey="pressure"
-            yAxisId="pressure"
-            type="basis"
-            isAnimationActive={false}
-            fill="url(#gradientPressure)"
-            fillOpacity={1}
-            dot={{stroke: colors.pressure.primary, r: 0.8}}
-            activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.pressure.secondary}
-            unit={' ' + units.pressure}
-          />
-          <Area
-            dataKey="co2"
-            yAxisId="co2"
-            type="basis"
-            isAnimationActive={false}
-            fill="url(#gradientCO2)"
-            fillOpacity={1}
-            dot={{stroke: colors.co2.primary, r: 0.8}}
-            activeDot={{stroke: '#fff', r: 1.5}}
-            stroke={colors.co2.secondary}
-            unit={' ' + units.co2}
-          />
+          {isTemperatureActive && (
+            <Area
+              dataKey="temperature"
+              yAxisId="temperature"
+              type="basis"
+              isAnimationActive={false}
+              fill="url(#gradientTemperature)"
+              fillOpacity={1}
+              dot={{stroke: colors.temperature.primary, r: 0.8}}
+              activeDot={{stroke: '#fff', r: 1.5}}
+              stroke={colors.temperature.secondary}
+              unit={' ' + units.temperature}
+            />
+          )}
+          {isHumidityActive && (
+            <Area
+              dataKey="humidity"
+              yAxisId="humidity"
+              type="basis"
+              isAnimationActive={false}
+              fill="url(#gradientHumidity)"
+              fillOpacity={1}
+              dot={{stroke: colors.humidity.primary, r: 0.8}}
+              activeDot={{stroke: '#fff', r: 1.5}}
+              stroke={colors.humidity.secondary}
+              unit={' ' + units.humidity}
+            />
+          )}
+          {isPressureActive && (
+            <Area
+              dataKey="pressure"
+              yAxisId="pressure"
+              type="basis"
+              isAnimationActive={false}
+              fill="url(#gradientPressure)"
+              fillOpacity={1}
+              dot={{stroke: colors.pressure.primary, r: 0.8}}
+              activeDot={{stroke: '#fff', r: 1.5}}
+              stroke={colors.pressure.secondary}
+              unit={' ' + units.pressure}
+            />
+          )}
+          {isCO2Active && (
+            <Area
+              dataKey="co2"
+              yAxisId="co2"
+              type="basis"
+              isAnimationActive={false}
+              fill="url(#gradientCO2)"
+              fillOpacity={1}
+              dot={{stroke: colors.co2.primary, r: 0.8}}
+              activeDot={{stroke: '#fff', r: 1.5}}
+              stroke={colors.co2.secondary}
+              unit={' ' + units.co2}
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

@@ -4,6 +4,7 @@ import cn from 'classnames';
 import useSamplesLimit from 'hooks/use-samples-limit';
 import useSamplesLoader from 'hooks/use-samples-loader';
 import * as preferences from 'utils/preferences';
+import ReadingType from 'utils/ReadingType';
 import Header from '../Header';
 import Readings from '../Readings';
 import Chart from '../Chart';
@@ -17,6 +18,16 @@ require('./shared/fonts.css');
 
 export default function App() {
   const [chartPeriod, setChartPeriod] = useState(preferences.chartPeriod());
+  const [isTemperatureActive, setIsTemperatureActive] = useState(
+    preferences.isTemperatureActive()
+  );
+  const [isHumidityActive, setIsHumidityActive] = useState(
+    preferences.isHumidityActive()
+  );
+  const [isPressureActive, setIsPressureActive] = useState(
+    preferences.isPressureActive()
+  );
+  const [isCO2Active, setIsCO2Active] = useState(preferences.isCO2Active());
   const [isConfigOpened, setIsConfigOpened] = useState(false);
   const {samplesLimit} = useSamplesLimit();
   const {loadStatus, samples, actualSample} = useSamplesLoader(
@@ -27,6 +38,29 @@ export default function App() {
   const onChartPeriodChange = useCallback(period => {
     preferences.chartPeriod(period);
     setChartPeriod(period);
+  }, []);
+
+  const onReadingActivationChange = useCallback((reading, isActive) => {
+    switch (reading) {
+      case ReadingType.temperature:
+        preferences.isTemperatureActive(isActive);
+        setIsTemperatureActive(isActive);
+        break;
+      case ReadingType.humidity:
+        preferences.isHumidityActive(isActive);
+        setIsHumidityActive(isActive);
+        break;
+      case ReadingType.pressure:
+        preferences.isPressureActive(isActive);
+        setIsPressureActive(isActive);
+        break;
+      case ReadingType.co2:
+        preferences.isCO2Active(isActive);
+        setIsCO2Active(isActive);
+        break;
+      default:
+        throw Error(`Unknown reading type '${reading}'`);
+    }
   }, []);
 
   const onConfigOpen = useCallback(() => {
@@ -48,11 +82,23 @@ export default function App() {
         status={loadStatus}
         onConfigOpen={onConfigOpen}
       />
-      <Readings className={classes.readings} sample={actualSample} />
+      <Readings
+        className={classes.readings}
+        sample={actualSample}
+        isTemperatureActive={isTemperatureActive}
+        isHumidityActive={isHumidityActive}
+        isPressureActive={isPressureActive}
+        isCO2Active={isCO2Active}
+        onReadingActivationChange={onReadingActivationChange}
+      />
       <Chart
         className={classes.chart}
         samples={samples}
         period={chartPeriod}
+        isTemperatureActive={isTemperatureActive}
+        isHumidityActive={isHumidityActive}
+        isPressureActive={isPressureActive}
+        isCO2Active={isCO2Active}
         onPeriodChange={onChartPeriodChange}
       />
       <Footer className={classes.footer} />
