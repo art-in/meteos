@@ -30,16 +30,12 @@ void Display::draw_next_reading(const Sample& sample) {
   METEOS_SCOPED_LOGGER("display: draw next reading");
 
   if (is_reading_shown_) {
-    sample_reading_idx++;
-
-    if (sample_reading_idx > 4) {
-      sample_reading_idx = 0;
-    }
+    reading = DisplayedReading((reading + 1) % (LAST + 1));
   } else {
-    sample_reading_idx = 0;
+    reading = FIRST;
   }
 
-  if (sample_reading_idx == 4) {
+  if (reading == NONE) {
     clear();
   } else {
     String title;
@@ -48,23 +44,23 @@ void Display::draw_next_reading(const Sample& sample) {
 
     is_reading_shown_ = true;
 
-    switch (sample_reading_idx) {
-      case 0:
+    switch (reading) {
+      case TEMPERATURE:
         title = "temperature";
         value = String(sample.temperature);
         value_units = "C";
         break;
-      case 1:
+      case HUMIDITY:
         title = "humidity";
         value = String(sample.humidity);
         value_units = "%";
         break;
-      case 2:
+      case PRESSURE:
         title = "pressure";
         value = String(sample.pressure);
         value_units = "mm";
         break;
-      case 3:
+      case CO2:
         title = "co2";
         value = String(sample.co2);
         value_units = "ppm";

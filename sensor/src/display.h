@@ -4,6 +4,16 @@
 
 #include "sample.h"
 
+enum DisplayedReading {
+  NONE = 0,
+  TEMPERATURE = 1,
+  HUMIDITY = 2,
+  PRESSURE = 3,
+  CO2 = 4,
+  FIRST = TEMPERATURE,
+  LAST = CO2
+};
+
 class Display {
  public:
   Display();
@@ -22,6 +32,6 @@ class Display {
   U8G2_SH1106_128X64_NONAME_F_HW_I2C display;
 
   static Display* instance;
-  int sample_reading_idx = 0;
+  DisplayedReading reading = NONE;
   bool is_reading_shown_ = false;
 };
