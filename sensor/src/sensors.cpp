@@ -1,4 +1,4 @@
-#include <Arduino.h>
+﻿#include <Arduino.h>
 #include <chrono>
 
 #include "sensors.h"
@@ -95,25 +95,31 @@ Sample Sensors::get_latest_sample() { return latest_sample; }
 //
 // esp32 radiates most of the heat, and some more comes from mh-z19 and battery.
 // case is heating up gradually (mistake grows) for 1-2 hours after startup.
-// mistake is different for usb and battery power supply (battery heats up).
+// mistake is different for usb and battery power supply (battery heats too).
 //
-// manual tests comparing Sensor reading with external not encased bme280:
-// - powering through esp32 dev board usb:
-// -- ext.bme280 = 23* °C,  Sensor = 25.2 °C, mistake = +2.2 °C
+// manual tests comparing readings from Sensor and external not encased bme280:
+// - powering with esp32 dev board usb:
+// -- ext.bme280 = 21.0 °C, Sensor = 23.0 °C, mistake = +2.0 °C
+// -- ext.bme280 = 22.1 °C, Sensor = 24.0 °C, mistake = +1.9 °C
+// -- ext.bme280 = 22.4 °C, Sensor = 24.4 °C, mistake = +2.0 °C
+// -- ext.bme280 = 23.7 °C, Sensor = 25.8 °C, mistake = +2.1 °C
+// -- ext.bme280 = 23.8 °C, Sensor = 26.0 °C, mistake = +2.2 °C
+// -- ext.bme280 = 23.9 °C, Sensor = 25.8 °C, mistake = +1.9 °C
+// -- ext.bme280 = 24.2 °C, Sensor = 26.2 °C, mistake = +2.0 °C
 // -- ext.bme280 = 26.2 °C, Sensor = 27.8 °C, mistake = +1.6 °C
 // -- ext.bme280 = 28.6 °C, Sensor = 30.4 °C, mistake = +1.8 °C
 // - powering with battery:
-// -- ext.bme280 = 22.5* °C, Sensor = 25.5 °C, mistake = +3 °C
-// -- ext.bme280 = 26 °C,    Sensor = 28.2 °C, mistake = +2.2 °C
+// -- ext.bme280 = 26   °C, Sensor = 28.2 °C, mistake = +2.2 °C
 //
-// TODO: (*) low temperatures were simulated by placing ice near sensor.
-//           test in natural cold environment (#56).
+// only add test data if readings are stabilized for at least 1 hour. this
+// should help to avoid effect of inertia after startup for both sources, and
+// also Sensor is generaly more inert to environment changes than ext.bme280.
+// eg. readings from Sensor is the same (+-0.02 °C) for last hour and the same
+// is for ext.bme280, or Sensor deviated +0.20 °C for last hour while ext.bme280
+// also deviated +0.20 °C for last hour.
 //
-// compensating mistake for usb power supply, since unable to check power
-// source and usb is primary one. for simplicity assuming that relation
-// is linear (though it's not). using linear equation basing on two readings
-// from manual tests.
+// compensating mistake for usb power supply instead of battery because usb is
+// main usecase. for simplicity assuming that mistake is constant.
 float Sensors::compensate_self_heating(float raw_temperature) {
-  double mistake = 3.6385 - 0.0769 * raw_temperature;
-  return raw_temperature - mistake;
+  return raw_temperature - 2;
 }
