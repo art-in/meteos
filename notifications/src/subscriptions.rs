@@ -1,5 +1,5 @@
 pub struct TgSubscription {
-    pub user_id: i64,
+    pub chat_id: i64,
 }
 
 pub struct Subscriptions {
@@ -16,6 +16,7 @@ impl Subscriptions {
 
     pub async fn add_tg_sub(&mut self, sub: TgSubscription) {
         // TODO: save subscription to database
+        // TODO: check for duplicate
         self.tg_subs.push(sub);
     }
 

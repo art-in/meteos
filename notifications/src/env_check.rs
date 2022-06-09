@@ -1,10 +1,10 @@
 use crate::{
-    backend_api::{self, Reading},
-    notification::{BackendErrorNotification, EnvOutOfNormNotification},
+    backend_api::{BackendApi, Reading},
+    config::Config,
+    notification::{BackendErrorNotification, EnvOutOfRangeNotification},
     notifier::Notifier,
 };
 use std::{
-    env,
     sync::Arc,
     time::{Duration, SystemTime},
 };
@@ -16,30 +16,15 @@ struct ConsecutiveErrors {
     pub notification_broadcasted: bool,
 }
 
-pub async fn start(notifier: Arc<Notifier>) {
-    // TODO: replace env vars with toml config
-    let check_interval: u64 = env::var("CHECK_INTERVAL_SEC")
-        .expect("CHECK_INTERVAL_SEC")
-        .parse()
-        .unwrap();
-    let check_interval = Duration::from_secs(check_interval);
-    let check_samples_period: u64 = env::var("CHECK_SAMPLES_PERIOD_SEC")
-        .expect("CHECK_SAMPLES_PERIOD_SEC")
-        .parse()
-        .unwrap();
-    let check_samples_period = Duration::from_secs(check_samples_period);
-    let backend_error_timeout: u64 = env::var("BACKEND_ERROR_TIMEOUT_SEC")
-        .expect("BACKEND_ERROR_TIMEOUT_SEC")
-        .parse()
-        .unwrap();
-    let backend_error_timeout = Duration::from_secs(backend_error_timeout);
+pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Arc<BackendApi>) {
+    let check_interval = Duration::from_secs(config.check_interval_sec);
+    let backend_error_timeout = Duration::from_secs(config.backend_error_timeout_sec);
 
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
-    let mut out_of_norm_notification_broadcasted = false;
 
     loop {
         log::debug!("new check loop iteration");
-        let samples = backend_api::get_latest_samples(check_samples_period).await;
+        let samples = backend_api.get_latest_samples().await;
 
         log::trace!("received samples: {:?}", samples);
 
@@ -74,17 +59,15 @@ pub async fn start(notifier: Arc<Notifier>) {
                 }
 
                 // TODO: check pressure
+                // TODO: do not send notification if it was already sent
 
-                if !readings_out_or_range.is_empty() && !out_of_norm_notification_broadcasted {
+                if !readings_out_or_range.is_empty() {
                     notifier
-                        .broadcast_notification(Box::new(EnvOutOfNormNotification {
+                        .broadcast(Box::new(EnvOutOfRangeNotification {
                             readings_out_or_range,
                             last_sample: last_sample.clone(),
                         }))
                         .await;
-                    out_of_norm_notification_broadcasted = true;
-                } else {
-                    out_of_norm_notification_broadcasted = false;
                 }
             }
             Err(error) => {
@@ -110,7 +93,7 @@ pub async fn start(notifier: Arc<Notifier>) {
 
                             if error_period >= backend_error_timeout {
                                 notifier
-                                    .broadcast_notification(Box::new(BackendErrorNotification {
+                                    .broadcast(Box::new(BackendErrorNotification {
                                         last_error: error,
                                         error_period,
                                         error_count: consecutive_errors.error_count,

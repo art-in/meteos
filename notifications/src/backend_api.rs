@@ -1,6 +1,8 @@
+use crate::config::Config;
 use serde::Deserialize;
 use std::{
     fmt::{Display, Formatter},
+    sync::Arc,
     time::Duration,
 };
 
@@ -71,28 +73,39 @@ impl Display for Error {
     }
 }
 
-pub async fn get_latest_samples(from_ago: Duration) -> Result<Vec<Sample>, Error> {
-    let now: chrono::DateTime<chrono::Utc> = std::time::SystemTime::now().into();
-    let from_ago = chrono::Duration::from_std(from_ago).unwrap();
-    let from = now
-        .checked_sub_signed(from_ago)
-        .unwrap()
-        .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+pub struct BackendApi {
+    config: Arc<Config>,
+}
 
-    let backend_url = std::env::var("METEOS_BACKEND_URL").expect("METEOS_BACKEND_URL");
-    let request_url = format!("{backend_url}/samples?from={from}");
-    let response = reqwest::get(request_url)
-        .await
-        .map_err(Error::UnreachableApi)?;
+impl BackendApi {
+    pub fn new(config: Arc<Config>) -> Self {
+        BackendApi { config }
+    }
 
-    let samples = response
-        .json::<Vec<Sample>>()
-        .await
-        .map_err(Error::ResponseDeserializationFailed)?;
+    pub async fn get_latest_samples(&self) -> Result<Vec<Sample>, Error> {
+        let backend_url = &self.config.meteos_backend_url;
 
-    if samples.is_empty() {
-        Err(Error::NoEnvSamples)
-    } else {
-        Ok(samples)
+        let now: chrono::DateTime<chrono::Utc> = std::time::SystemTime::now().into();
+        let period = chrono::Duration::seconds(self.config.latest_samples_period_sec as i64);
+        let from = now
+            .checked_sub_signed(period)
+            .unwrap()
+            .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+
+        let request_url = format!("{backend_url}/samples?from={from}");
+        let response = reqwest::get(request_url)
+            .await
+            .map_err(Error::UnreachableApi)?;
+
+        let samples = response
+            .json::<Vec<Sample>>()
+            .await
+            .map_err(Error::ResponseDeserializationFailed)?;
+
+        if samples.is_empty() {
+            Err(Error::NoEnvSamples)
+        } else {
+            Ok(samples)
+        }
     }
 }

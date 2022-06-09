@@ -1,8 +1,9 @@
 use crate::{
-    backend_api,
-    subs::{Subscriptions, TgSubscription},
+    backend_api::BackendApi,
+    config::Config,
+    subscriptions::{Subscriptions, TgSubscription},
 };
-use std::{error::Error, sync::Arc, time::Duration};
+use std::{error::Error, sync::Arc};
 use teloxide::{
     payloads::SendMessageSetters,
     prelude::*,
@@ -14,24 +15,37 @@ use tokio::sync::Mutex;
 pub struct TgBot {
     bot: AutoSend<Bot>,
     subs: Arc<Mutex<Subscriptions>>,
+    backend_api: Arc<BackendApi>,
 }
 
 #[derive(Clone)]
 struct Ctx {
     pub subs: Arc<Mutex<Subscriptions>>,
+    pub backend_api: Arc<BackendApi>,
 }
 
 impl TgBot {
-    pub fn new(subs: Arc<Mutex<Subscriptions>>) -> Self {
-        let token = std::env::var("TG_BOT_TOKEN").expect("TG_BOT_TOKEN");
-        let bot = Bot::new(token).auto_send();
-        TgBot { bot, subs }
+    pub fn new(
+        subs: Arc<Mutex<Subscriptions>>,
+        config: Arc<Config>,
+        backend_api: Arc<BackendApi>,
+    ) -> Self {
+        let bot = Bot::new(config.tg_bot_token.clone()).auto_send();
+        TgBot {
+            bot,
+            subs,
+            backend_api,
+        }
     }
 
     pub async fn send_message(&self, sub: &TgSubscription, message: &str) {
-        log::debug!("send_notification(user_id={})", sub.user_id);
+        log::debug!(
+            "send_message(chat_id={chat_id}, message={message})",
+            chat_id = sub.chat_id,
+            message = message
+        );
         self.bot
-            .send_message(ChatId(sub.user_id), message)
+            .send_message(ChatId(sub.chat_id), message)
             .parse_mode(ParseMode::MarkdownV2)
             .await
             .unwrap();
@@ -42,6 +56,7 @@ impl TgBot {
 
         let ctx = Ctx {
             subs: self.subs.clone(),
+            backend_api: self.backend_api.clone(),
         };
 
         let command_handler_with_context =
@@ -59,6 +74,7 @@ impl TgBot {
 #[derive(BotCommands, Clone)]
 #[command(rename = "lowercase", description = "These commands are supported:")]
 enum Command {
+    Start,
     #[command(description = "show available commands")]
     Help,
     #[command(description = "show latest environment data")]
@@ -74,12 +90,9 @@ async fn command_handler(
     ctx: Ctx,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     match command {
-        // TODO: add /start, with same response as on /help
-        Command::Help => {
-            bot.send_message(message.chat.id, Command::descriptions().to_string())
-                .await?;
-        }
-        Command::Env => on_command_env(bot, message).await?,
+        Command::Start => on_command_help(bot, message).await?,
+        Command::Help => on_command_help(bot, message).await?,
+        Command::Env => on_command_env(bot, message, ctx).await?,
         Command::Subscribe => on_command_subscribe(bot, message, ctx).await?,
         // TODO: add Unsubscribe
     };
@@ -87,11 +100,21 @@ async fn command_handler(
     Ok(())
 }
 
-async fn on_command_env(
+async fn on_command_help(
     bot: AutoSend<Bot>,
     message: Message,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let samples = backend_api::get_latest_samples(Duration::from_secs(300)).await;
+    bot.send_message(message.chat.id, Command::descriptions().to_string())
+        .await?;
+    Ok(())
+}
+
+async fn on_command_env(
+    bot: AutoSend<Bot>,
+    message: Message,
+    ctx: Ctx,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let samples = ctx.backend_api.get_latest_samples().await;
 
     let response_text = match samples {
         Ok(samples) => format!("{}", samples[samples.len() - 1]),
@@ -111,10 +134,10 @@ async fn on_command_subscribe(
     ctx: Ctx,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let sub = TgSubscription {
-        user_id: message.chat.id.0,
+        chat_id: message.chat.id.0,
     };
-    let mut subs = ctx.subs.lock().await;
-    subs.add_tg_sub(sub).await;
+
+    ctx.subs.lock().await.add_tg_sub(sub).await;
 
     bot.send_message(message.chat.id, "You are subscribed to notifications!")
         .await?;
