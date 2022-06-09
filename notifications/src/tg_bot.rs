@@ -1,13 +1,13 @@
 use crate::{
     backend_api::BackendApi,
     config::Config,
-    subscriptions::{Subscriptions, TgSubscription},
+    subscriptions::{Subscriptions, TgChat, TgChatPrivate, TgChatPublic, TgSubscription},
 };
 use std::{error::Error, sync::Arc};
 use teloxide::{
     payloads::SendMessageSetters,
     prelude::*,
-    types::{ChatId, ParseMode},
+    types::{ChatId, ChatKind, ParseMode},
     utils::command::BotCommands,
 };
 use tokio::sync::Mutex;
@@ -135,12 +135,28 @@ async fn on_command_subscribe(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let sub = TgSubscription {
         chat_id: message.chat.id.0,
+        chat_info: match message.chat.kind {
+            ChatKind::Private(chat) => TgChat::Private(TgChatPrivate {
+                username: chat.username,
+                first_name: chat.first_name,
+                last_name: chat.last_name,
+            }),
+            ChatKind::Public(chat) => TgChat::Public(TgChatPublic {
+                title: chat.title,
+                description: chat.description,
+            }),
+        },
     };
 
-    ctx.subs.lock().await.add_tg_sub(sub).await;
+    let is_new_sub = ctx.subs.lock().await.add_tg_sub(sub);
 
-    bot.send_message(message.chat.id, "You are subscribed to notifications!")
-        .await?;
+    let text = if is_new_sub {
+        "You are subscribed to notifications!"
+    } else {
+        "You have already been subscribed before."
+    };
+
+    bot.send_message(message.chat.id, text).await?;
 
     Ok(())
 }

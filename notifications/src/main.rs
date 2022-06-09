@@ -1,4 +1,5 @@
 // TODO: warn on ".unwrap()"
+// TODO: return Result instead of panic
 // TODO: add scripts for publishing to docker
 
 use crate::{backend_api::BackendApi, config::Config};

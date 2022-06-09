@@ -12,7 +12,7 @@ pub struct Notifier {
 
 impl Notifier {
     pub fn new(config: Arc<Config>, backend_api: Arc<BackendApi>) -> Self {
-        let subs = Arc::new(Mutex::new(Subscriptions::new()));
+        let subs = Arc::new(Mutex::new(Subscriptions::load()));
         let tg_bot = TgBot::new(subs.clone(), config, backend_api);
         Notifier { subs, tg_bot }
     }
@@ -31,7 +31,7 @@ impl Notifier {
             notification = notification
         );
 
-        for sub in subs {
+        for sub in &subs {
             self.tg_bot
                 .send_message(sub, &notification.get_message())
                 .await;
