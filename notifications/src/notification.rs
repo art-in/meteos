@@ -41,8 +41,8 @@ impl Notification for EnvOutOfRangeNotification {
 impl Notification for BackendErrorNotification {
     fn get_message(&self) -> String {
         format!(
-            "Error: \
-            {count} backend requests are failing for last {period} minute\\(s\\). \
+            "ERROR: \
+            {count} backend request\\(s\\) failed in last {period} minute\\(s\\)\\. \
             Last error: {last_error}",
             count = self.error_count,
             period = (self.error_period.as_secs() / 60) as u32,

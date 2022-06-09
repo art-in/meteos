@@ -21,6 +21,7 @@ pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Ar
     let backend_error_timeout = Duration::from_secs(config.backend_error_timeout_sec);
 
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
+    let mut is_out_of_range_notification_sent = false;
 
     loop {
         log::debug!("new check loop iteration");
@@ -59,18 +60,23 @@ pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Ar
                 }
 
                 // TODO: check pressure
-                // TODO: do not send notification if it was already sent
 
                 if !readings_out_or_range.is_empty() {
-                    notifier
-                        .broadcast(Box::new(EnvOutOfRangeNotification {
-                            readings_out_or_range,
-                            last_sample: last_sample.clone(),
-                        }))
-                        .await;
+                    if !is_out_of_range_notification_sent {
+                        notifier
+                            .broadcast(Box::new(EnvOutOfRangeNotification {
+                                readings_out_or_range,
+                                last_sample: last_sample.clone(),
+                            }))
+                            .await;
+                        is_out_of_range_notification_sent = true;
+                    }
+                } else {
+                    is_out_of_range_notification_sent = false;
                 }
             }
             Err(error) => {
+                is_out_of_range_notification_sent = false;
                 log::trace!("{:?}", consecutive_errors);
 
                 // do not broadcast error notification immediately after first error, give it some
