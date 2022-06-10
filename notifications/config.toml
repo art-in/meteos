@@ -1,5 +1,5 @@
 # url of Meteos backend to fetch environment samples from
-meteos_backend_url = "https://artin.space1/meteos/api"
+meteos_backend_url = "https://artin.space/meteos/api"
 
 # token of telegram bot that is used for subscribing to notifications and
 # sending notification messages to subscribed users

@@ -61,6 +61,17 @@ impl Subscriptions {
         Ok(is_new_sub)
     }
 
+    pub fn remove_tg_sub(&mut self, chat_id: i64) -> Result<bool> {
+        let was_existing_sub = self
+            .db
+            .write(|db| db.tg_subs.remove(&chat_id).is_some())
+            .context("failed to write to database")?;
+
+        self.db.save().context("failed to save database")?;
+
+        Ok(was_existing_sub)
+    }
+
     pub fn get_tg_subs(&self) -> Result<Vec<TgSubscription>> {
         Ok(self.db.read(|db| db.tg_subs.values().cloned().collect())?)
     }

@@ -109,6 +109,8 @@ enum Command {
     Env,
     #[command(description = "subscribe to notifications")]
     Subscribe,
+    #[command(description = "unsubscribe from notifications")]
+    Unsubscribe,
 }
 
 async fn command_handler(
@@ -122,26 +124,33 @@ async fn command_handler(
         Command::Help => on_command_help(bot, message).await?,
         Command::Env => on_command_env(bot, message, ctx).await?,
         Command::Subscribe => on_command_subscribe(bot, message, ctx).await?,
-        // TODO: add Unsubscribe
+        Command::Unsubscribe => on_command_unsubscribe(bot, message, ctx).await?,
     };
 
     Ok(())
 }
 
 async fn on_command_help(bot: AutoSend<Bot>, message: teloxide::types::Message) -> Result<()> {
-    bot.send_message(message.chat.id, Command::descriptions().to_string())
-        .await?;
+    send_message_impl(
+        &bot,
+        message.chat.id.0,
+        TgMessage {
+            format: TgMessageFormat::Html,
+            text: Command::descriptions().to_string(),
+        },
+    )
+    .await?;
     Ok(())
 }
 
 async fn on_command_env(
     bot: AutoSend<Bot>,
-    incoming_message: teloxide::types::Message,
+    message: teloxide::types::Message,
     ctx: Ctx,
 ) -> Result<()> {
     let samples = ctx.backend_api.get_latest_samples().await;
 
-    let message = match samples {
+    let outgoing_message = match samples {
         Ok(samples) => TgMessage {
             format: TgMessageFormat::MarkdownV2,
             text: samples[samples.len() - 1].format_as_markdown(),
@@ -155,7 +164,7 @@ async fn on_command_env(
         }
     };
 
-    send_message_impl(&bot, incoming_message.chat.id.0, message).await?;
+    send_message_impl(&bot, message.chat.id.0, outgoing_message).await?;
 
     Ok(())
 }
@@ -187,13 +196,42 @@ async fn on_command_subscribe(
         .add_tg_sub(sub)
         .context("failed to add telegram subscription")?;
 
-    let text = if is_new_sub {
-        "You are subscribed to notifications!"
-    } else {
-        "You have already been subscribed before."
+    let outgoing_message = TgMessage {
+        format: TgMessageFormat::Html,
+        text: if is_new_sub {
+            "You are subscribed to notifications!".into()
+        } else {
+            "You have already been subscribed before.".into()
+        },
     };
 
-    bot.send_message(message.chat.id, text).await?;
+    send_message_impl(&bot, message.chat.id.0, outgoing_message).await?;
+
+    Ok(())
+}
+
+async fn on_command_unsubscribe(
+    bot: AutoSend<Bot>,
+    message: teloxide::types::Message,
+    ctx: Ctx,
+) -> Result<()> {
+    let was_existing_sub = ctx
+        .subs
+        .lock()
+        .await
+        .remove_tg_sub(message.chat.id.0)
+        .context("failed to remove telegram subscription")?;
+
+    let outgoing_message = TgMessage {
+        format: TgMessageFormat::Html,
+        text: if was_existing_sub {
+            "You was unsubscribed from notifications!".into()
+        } else {
+            "You are not subscribed yet.".into()
+        },
+    };
+
+    send_message_impl(&bot, message.chat.id.0, outgoing_message).await?;
 
     Ok(())
 }
