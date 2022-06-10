@@ -42,7 +42,7 @@ pub async fn start(
                 // samples of check period. this should smooth short spikes of certain reading.
                 // eg. when co2 goes beyond range max for one minute when human is too close to
                 // the sensor, we don't want to raise alarm for that
-                let last_sample = &samples[samples.len() - 1];
+                let latest_sample = &samples[samples.len() - 1];
                 let mut readings_out_or_range = Vec::new();
 
                 // TODO: move ranges to config
@@ -71,7 +71,7 @@ pub async fn start(
                         notifier
                             .broadcast(Box::new(EnvOutOfRangeNotification {
                                 readings_out_or_range,
-                                last_sample: last_sample.clone(),
+                                latest_sample: latest_sample.clone(),
                             }))
                             .await?;
                         is_out_of_range_notification_sent = true;
@@ -104,7 +104,7 @@ pub async fn start(
                             if error_period >= backend_error_timeout {
                                 notifier
                                     .broadcast(Box::new(BackendErrorNotification {
-                                        last_error: error,
+                                        latest_error: error,
                                         error_period,
                                         error_count: consecutive_errors.error_count,
                                     }))

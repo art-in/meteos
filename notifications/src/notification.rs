@@ -4,13 +4,12 @@ use std::{fmt::Debug, time::Duration};
 #[derive(Debug)]
 pub struct EnvOutOfRangeNotification {
     pub readings_out_or_range: Vec<Reading>,
-    // TODO: rename to latest
-    pub last_sample: Sample,
+    pub latest_sample: Sample,
 }
 
 #[derive(Debug)]
 pub struct BackendErrorNotification {
-    pub last_error: backend_api::BackendApiError,
+    pub latest_error: backend_api::BackendApiError,
     pub error_period: Duration,
     pub error_count: u32,
 }
@@ -42,8 +41,8 @@ impl Notification for EnvOutOfRangeNotification {
             format: NotificationMessageFormat::Markdown,
             text: format!(
                 "{readings} is \\(are\\) out of normal range\n\n\
-                {last_sample}",
-                last_sample = self.last_sample
+                {latest_sample}",
+                latest_sample = self.latest_sample
             ),
         }
     }
@@ -55,11 +54,11 @@ impl Notification for BackendErrorNotification {
             format: NotificationMessageFormat::Html,
             text: format!(
                 "ERROR: \
-                {count} backend request(s) failed in last {period} minute(s). \
-                Last error: {last_error}",
+                {count} backend request(s) have failed in the last {period} minute(s). \
+                Latest error: {latest_error}",
                 count = self.error_count,
                 period = (self.error_period.as_secs() / 60) as u32,
-                last_error = self.last_error
+                latest_error = self.latest_error
             ),
         }
     }
