@@ -1,16 +1,17 @@
 use crate::{
     backend_api::BackendApi,
     config::Config,
-    notification::{NotificationMessage, NotificationMessageFormat},
     subscriptions::{Subscriptions, TgChat, TgChatPrivate, TgChatPublic, TgSubscription},
 };
 use anyhow::{Context, Result};
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 use teloxide::{
+    adaptors::AutoSend,
     payloads::SendMessageSetters,
-    prelude::*,
+    prelude::{Requester, RequesterExt},
     types::{ChatId, ChatKind, ParseMode},
     utils::command::BotCommands,
+    Bot,
 };
 use tokio::sync::Mutex;
 
@@ -20,6 +21,19 @@ pub struct TgBot {
     backend_api: Arc<BackendApi>,
 }
 
+pub struct TgMessage {
+    pub format: TgMessageFormat,
+    pub text: String,
+}
+
+pub enum TgMessageFormat {
+    Html,
+    MarkdownV2,
+}
+
+pub trait GetTgMessage: Debug {
+    fn get_tg_message(&self) -> TgMessage;
+}
 #[derive(Clone)]
 struct Ctx {
     pub subs: Arc<Mutex<Subscriptions>>,
@@ -40,32 +54,6 @@ impl TgBot {
         }
     }
 
-    pub async fn send_message(
-        &self,
-        sub: &TgSubscription,
-        message: NotificationMessage,
-    ) -> Result<()> {
-        log::debug!(
-            "send_message(chat_id={chat_id}, message={message})",
-            chat_id = sub.chat_id,
-            message = message.text
-        );
-
-        self.bot
-            .send_message(ChatId(sub.chat_id), &message.text)
-            .parse_mode(match message.format {
-                NotificationMessageFormat::Html => ParseMode::Html,
-                NotificationMessageFormat::Markdown => ParseMode::MarkdownV2,
-            })
-            .await
-            .context(format!(
-                "failed to send telegram message: \"{message}\"",
-                message = &message.text,
-            ))?;
-
-        Ok(())
-    }
-
     pub async fn start_command_server(&self) {
         log::info!("starting command server...");
 
@@ -84,6 +72,31 @@ impl TgBot {
         )
         .await;
     }
+
+    pub async fn send_message(&self, chat_id: i64, message: TgMessage) -> Result<()> {
+        send_message_impl(&self.bot, chat_id, message).await
+    }
+}
+
+async fn send_message_impl(bot: &AutoSend<Bot>, chat_id: i64, message: TgMessage) -> Result<()> {
+    log::debug!(
+        "send_message(chat_id={chat_id}, message={message})",
+        chat_id = chat_id,
+        message = message.text
+    );
+
+    bot.send_message(ChatId(chat_id), &message.text)
+        .parse_mode(match message.format {
+            TgMessageFormat::Html => ParseMode::Html,
+            TgMessageFormat::MarkdownV2 => ParseMode::MarkdownV2,
+        })
+        .await
+        .context(format!(
+            "failed to send telegram message: \"{message}\"",
+            message = &message.text,
+        ))?;
+
+    Ok(())
 }
 
 #[derive(BotCommands, Clone)]
@@ -100,7 +113,7 @@ enum Command {
 
 async fn command_handler(
     bot: AutoSend<Bot>,
-    message: Message,
+    message: teloxide::types::Message,
     command: Command,
     ctx: Ctx,
 ) -> Result<()> {
@@ -115,33 +128,43 @@ async fn command_handler(
     Ok(())
 }
 
-async fn on_command_help(bot: AutoSend<Bot>, message: Message) -> Result<()> {
+async fn on_command_help(bot: AutoSend<Bot>, message: teloxide::types::Message) -> Result<()> {
     bot.send_message(message.chat.id, Command::descriptions().to_string())
         .await?;
     Ok(())
 }
 
-async fn on_command_env(bot: AutoSend<Bot>, message: Message, ctx: Ctx) -> Result<()> {
+async fn on_command_env(
+    bot: AutoSend<Bot>,
+    incoming_message: teloxide::types::Message,
+    ctx: Ctx,
+) -> Result<()> {
     let samples = ctx.backend_api.get_latest_samples().await;
 
-    let response_text = match samples {
-        Ok(samples) => format!("{}", samples[samples.len() - 1]),
+    let message = match samples {
+        Ok(samples) => TgMessage {
+            format: TgMessageFormat::MarkdownV2,
+            text: samples[samples.len() - 1].format_as_markdown(),
+        },
         Err(error) => {
             log::error!("{}", error);
-
-            format!("Error: {}", error)
+            TgMessage {
+                format: TgMessageFormat::Html,
+                text: format!("ERROR: {}", error),
+            }
         }
     };
 
-    // TODO: reuse send_message
-    bot.send_message(message.chat.id, response_text)
-        .parse_mode(ParseMode::MarkdownV2)
-        .await?;
+    send_message_impl(&bot, incoming_message.chat.id.0, message).await?;
 
     Ok(())
 }
 
-async fn on_command_subscribe(bot: AutoSend<Bot>, message: Message, ctx: Ctx) -> Result<()> {
+async fn on_command_subscribe(
+    bot: AutoSend<Bot>,
+    message: teloxide::types::Message,
+    ctx: Ctx,
+) -> Result<()> {
     let sub = TgSubscription {
         chat_id: message.chat.id.0,
         chat_info: match message.chat.kind {

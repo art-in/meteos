@@ -83,6 +83,7 @@ pub async fn start(
             Err(error) => {
                 is_out_of_range_notification_sent = false;
                 log::trace!("{:?}", consecutive_errors);
+                log::error!("{}", error);
 
                 // do not broadcast error notification immediately after first error, give it some
                 // time and broadcast only if it consistently failing for some period of time

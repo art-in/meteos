@@ -39,7 +39,7 @@ impl Notifier {
         for sub in &subs {
             let res = self
                 .tg_bot
-                .send_message(sub, notification.get_message())
+                .send_message(sub.chat_id, notification.get_tg_message())
                 .await;
 
             if let Err(error) = res {

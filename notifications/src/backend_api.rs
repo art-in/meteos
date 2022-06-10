@@ -21,10 +21,9 @@ pub struct Sample {
     pub time: String,
 }
 
-impl Display for Sample {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
+impl Sample {
+    pub fn format_as_markdown(&self) -> String {
+        format!(
             "```\n\
             🌡 temperature: {} °C\n\
             💧 humidity:    {} %\n\

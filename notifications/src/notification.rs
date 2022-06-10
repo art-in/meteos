@@ -1,4 +1,7 @@
-use crate::backend_api::{self, Reading, Sample};
+use crate::{
+    backend_api::{self, Reading, Sample},
+    tg_bot::{GetTgMessage, TgMessage, TgMessageFormat},
+};
 use std::{fmt::Debug, time::Duration};
 
 #[derive(Debug)]
@@ -14,22 +17,17 @@ pub struct BackendErrorNotification {
     pub error_count: u32,
 }
 
-pub struct NotificationMessage {
-    pub format: NotificationMessageFormat,
-    pub text: String,
-}
+// telegram message is the only representation supported for now.
+// work on more notification channels in future may require to extend
+// Notification to support more representations. eg.:
+// trait Notification: GetTgMessage + GetEmailMessage + GetSmsMessage {}
+pub trait Notification: GetTgMessage {}
 
-pub enum NotificationMessageFormat {
-    Html,
-    Markdown,
-}
+impl Notification for EnvOutOfRangeNotification {}
+impl Notification for BackendErrorNotification {}
 
-pub trait Notification: Debug {
-    fn get_message(&self) -> NotificationMessage;
-}
-
-impl Notification for EnvOutOfRangeNotification {
-    fn get_message(&self) -> NotificationMessage {
+impl GetTgMessage for EnvOutOfRangeNotification {
+    fn get_tg_message(&self) -> TgMessage {
         let readings: Vec<String> = self
             .readings_out_or_range
             .iter()
@@ -37,21 +35,21 @@ impl Notification for EnvOutOfRangeNotification {
             .collect();
         let readings = readings.join(", ");
 
-        NotificationMessage {
-            format: NotificationMessageFormat::Markdown,
+        TgMessage {
+            format: TgMessageFormat::MarkdownV2,
             text: format!(
                 "{readings} is \\(are\\) out of normal range\n\n\
-                {latest_sample}",
-                latest_sample = self.latest_sample
+                {latest_sample_md}",
+                latest_sample_md = self.latest_sample.format_as_markdown()
             ),
         }
     }
 }
 
-impl Notification for BackendErrorNotification {
-    fn get_message(&self) -> NotificationMessage {
-        NotificationMessage {
-            format: NotificationMessageFormat::Html,
+impl GetTgMessage for BackendErrorNotification {
+    fn get_tg_message(&self) -> TgMessage {
+        TgMessage {
+            format: TgMessageFormat::Html,
             text: format!(
                 "ERROR: \
                 {count} backend request(s) have failed in the last {period} minute(s). \
