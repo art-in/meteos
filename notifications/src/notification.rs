@@ -10,18 +10,27 @@ pub struct EnvOutOfRangeNotification {
 
 #[derive(Debug)]
 pub struct BackendErrorNotification {
-    // TODO: rename to latest
-    pub last_error: backend_api::Error,
+    pub last_error: backend_api::BackendApiError,
     pub error_period: Duration,
     pub error_count: u32,
 }
 
+pub struct NotificationMessage {
+    pub format: NotificationMessageFormat,
+    pub text: String,
+}
+
+pub enum NotificationMessageFormat {
+    Html,
+    Markdown,
+}
+
 pub trait Notification: Debug {
-    fn get_message(&self) -> String;
+    fn get_message(&self) -> NotificationMessage;
 }
 
 impl Notification for EnvOutOfRangeNotification {
-    fn get_message(&self) -> String {
+    fn get_message(&self) -> NotificationMessage {
         let readings: Vec<String> = self
             .readings_out_or_range
             .iter()
@@ -29,24 +38,29 @@ impl Notification for EnvOutOfRangeNotification {
             .collect();
         let readings = readings.join(", ");
 
-        format!(
-            "{readings} is \\(are\\) out of normal range\n\
-            \n\
-            {last_sample}",
-            last_sample = self.last_sample
-        )
+        NotificationMessage {
+            format: NotificationMessageFormat::Markdown,
+            text: format!(
+                "{readings} is \\(are\\) out of normal range\n\n\
+                {last_sample}",
+                last_sample = self.last_sample
+            ),
+        }
     }
 }
 
 impl Notification for BackendErrorNotification {
-    fn get_message(&self) -> String {
-        format!(
-            "ERROR: \
-            {count} backend request\\(s\\) failed in last {period} minute\\(s\\)\\. \
-            Last error: {last_error}",
-            count = self.error_count,
-            period = (self.error_period.as_secs() / 60) as u32,
-            last_error = self.last_error
-        )
+    fn get_message(&self) -> NotificationMessage {
+        NotificationMessage {
+            format: NotificationMessageFormat::Html,
+            text: format!(
+                "ERROR: \
+                {count} backend request(s) failed in last {period} minute(s). \
+                Last error: {last_error}",
+                count = self.error_count,
+                period = (self.error_period.as_secs() / 60) as u32,
+                last_error = self.last_error
+            ),
+        }
     }
 }

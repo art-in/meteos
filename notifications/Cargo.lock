@@ -12,6 +12,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.57"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
+
+[[package]]
 name = "aquamarine"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -570,6 +576,7 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 name = "meteos-notifications"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "log",
  "pretty_env_logger",
@@ -577,6 +584,7 @@ dependencies = [
  "rustbreak",
  "serde",
  "teloxide",
+ "thiserror",
  "tokio",
  "toml",
 ]

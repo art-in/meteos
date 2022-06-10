@@ -6,7 +6,7 @@ meteos_backend_url = "https://artin.space/meteos/api"
 tg_bot_token = "5366431629:AAEZnMxpZoRTIhSwkfBxX1fHrUJSu6ELl8s"
 
 # how often to check environment conditions
-check_interval_sec = 60
+check_interval_sec = 30
 
 # what period to use for fetching latest environment samples from backend.
 # this should be equal or longer than sampling interval, otherwise no samples may
@@ -14,4 +14,4 @@ check_interval_sec = 60
 latest_samples_period_sec = 60
 
 # how long to wait for successful backend response until sending error notification
-backend_error_timeout_sec = 60
+backend_error_timeout_sec = 30

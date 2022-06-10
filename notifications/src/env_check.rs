@@ -4,19 +4,24 @@ use crate::{
     notification::{BackendErrorNotification, EnvOutOfRangeNotification},
     notifier::Notifier,
 };
+use anyhow::Result;
 use std::{
     sync::Arc,
-    time::{Duration, SystemTime},
+    time::{Duration, Instant},
 };
 
 #[derive(Debug)]
 struct ConsecutiveErrors {
-    pub first_error_time: SystemTime,
+    pub first_error_time: Instant,
     pub error_count: u32,
     pub notification_broadcasted: bool,
 }
 
-pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Arc<BackendApi>) {
+pub async fn start(
+    notifier: Arc<Notifier>,
+    config: Arc<Config>,
+    backend_api: Arc<BackendApi>,
+) -> Result<()> {
     let check_interval = Duration::from_secs(config.check_interval_sec);
     let backend_error_timeout = Duration::from_secs(config.backend_error_timeout_sec);
 
@@ -68,7 +73,7 @@ pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Ar
                                 readings_out_or_range,
                                 last_sample: last_sample.clone(),
                             }))
-                            .await;
+                            .await?;
                         is_out_of_range_notification_sent = true;
                     }
                 } else {
@@ -84,16 +89,15 @@ pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Ar
                 match consecutive_errors.as_mut() {
                     None => {
                         consecutive_errors = Some(ConsecutiveErrors {
-                            first_error_time: SystemTime::now(),
+                            first_error_time: Instant::now(),
                             error_count: 0,
                             notification_broadcasted: false,
                         });
                     }
                     Some(consecutive_errors) => {
                         if !consecutive_errors.notification_broadcasted {
-                            let error_period = SystemTime::now()
-                                .duration_since(consecutive_errors.first_error_time)
-                                .unwrap();
+                            let error_period =
+                                Instant::now().duration_since(consecutive_errors.first_error_time);
 
                             consecutive_errors.error_count += 1;
 
@@ -104,7 +108,7 @@ pub async fn start(notifier: Arc<Notifier>, config: Arc<Config>, backend_api: Ar
                                         error_period,
                                         error_count: consecutive_errors.error_count,
                                     }))
-                                    .await;
+                                    .await?;
                                 consecutive_errors.notification_broadcasted = true;
                             }
                         }

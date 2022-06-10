@@ -1,9 +1,11 @@
 use crate::{
     backend_api::BackendApi,
     config::Config,
+    notification::{NotificationMessage, NotificationMessageFormat},
     subscriptions::{Subscriptions, TgChat, TgChatPrivate, TgChatPublic, TgSubscription},
 };
-use std::{error::Error, sync::Arc};
+use anyhow::{Context, Result};
+use std::sync::Arc;
 use teloxide::{
     payloads::SendMessageSetters,
     prelude::*,
@@ -38,17 +40,30 @@ impl TgBot {
         }
     }
 
-    pub async fn send_message(&self, sub: &TgSubscription, message: &str) {
+    pub async fn send_message(
+        &self,
+        sub: &TgSubscription,
+        message: NotificationMessage,
+    ) -> Result<()> {
         log::debug!(
             "send_message(chat_id={chat_id}, message={message})",
             chat_id = sub.chat_id,
-            message = message
+            message = message.text
         );
+
         self.bot
-            .send_message(ChatId(sub.chat_id), message)
-            .parse_mode(ParseMode::MarkdownV2)
+            .send_message(ChatId(sub.chat_id), &message.text)
+            .parse_mode(match message.format {
+                NotificationMessageFormat::Html => ParseMode::Html,
+                NotificationMessageFormat::Markdown => ParseMode::MarkdownV2,
+            })
             .await
-            .unwrap();
+            .context(format!(
+                "failed to send telegram message: \"{message}\"",
+                message = &message.text,
+            ))?;
+
+        Ok(())
     }
 
     pub async fn start_command_server(&self) {
@@ -88,7 +103,7 @@ async fn command_handler(
     message: Message,
     command: Command,
     ctx: Ctx,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+) -> Result<()> {
     match command {
         Command::Start => on_command_help(bot, message).await?,
         Command::Help => on_command_help(bot, message).await?,
@@ -100,27 +115,25 @@ async fn command_handler(
     Ok(())
 }
 
-async fn on_command_help(
-    bot: AutoSend<Bot>,
-    message: Message,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn on_command_help(bot: AutoSend<Bot>, message: Message) -> Result<()> {
     bot.send_message(message.chat.id, Command::descriptions().to_string())
         .await?;
     Ok(())
 }
 
-async fn on_command_env(
-    bot: AutoSend<Bot>,
-    message: Message,
-    ctx: Ctx,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn on_command_env(bot: AutoSend<Bot>, message: Message, ctx: Ctx) -> Result<()> {
     let samples = ctx.backend_api.get_latest_samples().await;
 
     let response_text = match samples {
         Ok(samples) => format!("{}", samples[samples.len() - 1]),
-        Err(error) => format!("Error: {}", error),
+        Err(error) => {
+            log::error!("{}", error);
+
+            format!("Error: {}", error)
+        }
     };
 
+    // TODO: reuse send_message
     bot.send_message(message.chat.id, response_text)
         .parse_mode(ParseMode::MarkdownV2)
         .await?;
@@ -128,11 +141,7 @@ async fn on_command_env(
     Ok(())
 }
 
-async fn on_command_subscribe(
-    bot: AutoSend<Bot>,
-    message: Message,
-    ctx: Ctx,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn on_command_subscribe(bot: AutoSend<Bot>, message: Message, ctx: Ctx) -> Result<()> {
     let sub = TgSubscription {
         chat_id: message.chat.id.0,
         chat_info: match message.chat.kind {
@@ -148,7 +157,12 @@ async fn on_command_subscribe(
         },
     };
 
-    let is_new_sub = ctx.subs.lock().await.add_tg_sub(sub);
+    let is_new_sub = ctx
+        .subs
+        .lock()
+        .await
+        .add_tg_sub(sub)
+        .context("failed to add telegram subscription")?;
 
     let text = if is_new_sub {
         "You are subscribed to notifications!"

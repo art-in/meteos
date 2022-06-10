@@ -13,3 +13,5 @@ serde = { version = "1.0.137", features = ["derive"] }
 chrono = "0.4.19"
 toml = "0.5.9"
 rustbreak = { version = "2.0.0", features = ["ron_enc"] }
+anyhow = "1.0.57"
+thiserror = "1.0.31"

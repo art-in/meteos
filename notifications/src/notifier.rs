@@ -2,6 +2,7 @@ use crate::{
     backend_api::BackendApi, config::Config, notification::Notification,
     subscriptions::Subscriptions, tg_bot::TgBot,
 };
+use anyhow::{Context, Result};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -11,19 +12,23 @@ pub struct Notifier {
 }
 
 impl Notifier {
-    pub fn new(config: Arc<Config>, backend_api: Arc<BackendApi>) -> Self {
-        let subs = Arc::new(Mutex::new(Subscriptions::load()));
+    pub fn init(config: Arc<Config>, backend_api: Arc<BackendApi>) -> Result<Self> {
+        let subs = Arc::new(Mutex::new(
+            Subscriptions::load().context("failed to load subscriptions")?,
+        ));
         let tg_bot = TgBot::new(subs.clone(), config, backend_api);
-        Notifier { subs, tg_bot }
+        Ok(Notifier { subs, tg_bot })
     }
 
     pub async fn start_subscription_service(&self) {
         self.tg_bot.start_command_server().await;
     }
 
-    pub async fn broadcast(&self, notification: Box<dyn Notification + Send + Sync>) {
+    pub async fn broadcast(&self, notification: Box<dyn Notification + Send + Sync>) -> Result<()> {
         let subs = self.subs.lock().await;
-        let subs = subs.get_tg_subs();
+        let subs = subs
+            .get_tg_subs()
+            .context("failed to get telegram subscriptions")?;
 
         log::debug!(
             "Notifier::broadcast(subs_count={subs_count}, notification={notification:?})",
@@ -32,9 +37,20 @@ impl Notifier {
         );
 
         for sub in &subs {
-            self.tg_bot
-                .send_message(sub, &notification.get_message())
+            let res = self
+                .tg_bot
+                .send_message(sub, notification.get_message())
                 .await;
+
+            if let Err(error) = res {
+                log::error!(
+                    "failed to send notification to telegram subscription {sub:?}: {error:?}",
+                    sub = sub,
+                    error = error
+                );
+            }
         }
+
+        Ok(())
     }
 }

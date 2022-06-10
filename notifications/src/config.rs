@@ -1,4 +1,5 @@
-use std::{error::Error, fs::File, io::Read};
+use anyhow::Result;
+use std::{fs::File, io::Read};
 
 #[derive(serde::Deserialize)]
 pub struct Config {
@@ -10,7 +11,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn read() -> Result<Self, Box<dyn Error>> {
+    pub fn read() -> Result<Self> {
         let mut str = String::new();
         File::open("./config.toml")?.read_to_string(&mut str)?;
         Ok(toml::from_str(&str)?)

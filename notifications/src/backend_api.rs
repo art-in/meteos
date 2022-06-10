@@ -1,9 +1,10 @@
 use crate::config::Config;
+use chrono::{DateTime, Utc};
+use reqwest::{Response, StatusCode};
 use serde::Deserialize;
 use std::{
     fmt::{Display, Formatter},
     sync::Arc,
-    time::Duration,
 };
 
 #[derive(Deserialize, Debug, Clone)]
@@ -55,22 +56,25 @@ impl Display for Reading {
     }
 }
 
-#[derive(Debug)]
-pub enum Error {
-    UnreachableApi(reqwest::Error),
-    ResponseDeserializationFailed(reqwest::Error),
+#[derive(thiserror::Error, Debug)]
+pub enum BackendApiError {
+    #[error("failed to reach Meteos API: {}", .source)]
+    UnreachableApi { source: UnreachableApiError },
+    #[error("failed to parse Meteos API response: {}", .source)]
+    ResponseDeserializationFailed { source: reqwest::Error },
+    #[error("no environment samples received from Meteos API")]
     NoEnvSamples,
 }
 
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            Error::UnreachableApi(_) => "Failed to reach Meteos API",
-            Error::ResponseDeserializationFailed(_) => "Failed to parse Meteos API response",
-            Error::NoEnvSamples => "No environment samples received from Meteos API",
-        };
-        write!(f, "{}", message)
-    }
+#[derive(thiserror::Error, Debug)]
+pub enum UnreachableApiError {
+    #[error("invalid status code \"{}\"", .0)]
+    InvalidStatusCode(StatusCode),
+    #[error(transparent)]
+    Other {
+        #[from]
+        source: reqwest::Error,
+    },
 }
 
 pub struct BackendApi {
@@ -82,30 +86,47 @@ impl BackendApi {
         BackendApi { config }
     }
 
-    pub async fn get_latest_samples(&self) -> Result<Vec<Sample>, Error> {
+    async fn request(&self, path: &str) -> Result<Response, BackendApiError> {
         let backend_url = &self.config.meteos_backend_url;
+        let request_url = format!("{backend_url}/{path}");
+        let response =
+            reqwest::get(request_url)
+                .await
+                .map_err(|err| BackendApiError::UnreachableApi {
+                    source: UnreachableApiError::Other { source: err },
+                })?;
 
+        if response.status() != StatusCode::OK {
+            return Err(BackendApiError::UnreachableApi {
+                source: UnreachableApiError::InvalidStatusCode(response.status()),
+            });
+        }
+
+        Ok(response)
+    }
+
+    pub async fn get_samples(&self, from: DateTime<Utc>) -> Result<Vec<Sample>, BackendApiError> {
+        let from = from.to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+        let response = self.request(&format!("samples?from={from}")).await?;
+        let samples = response
+            .json::<Vec<Sample>>()
+            .await
+            .map_err(|err| BackendApiError::ResponseDeserializationFailed { source: err })?;
+
+        if samples.is_empty() {
+            Err(BackendApiError::NoEnvSamples)
+        } else {
+            Ok(samples)
+        }
+    }
+
+    pub async fn get_latest_samples(&self) -> Result<Vec<Sample>, BackendApiError> {
         let now: chrono::DateTime<chrono::Utc> = std::time::SystemTime::now().into();
         let period = chrono::Duration::seconds(self.config.latest_samples_period_sec as i64);
         let from = now
             .checked_sub_signed(period)
-            .unwrap()
-            .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+            .expect("failed to substruct duration");
 
-        let request_url = format!("{backend_url}/samples?from={from}");
-        let response = reqwest::get(request_url)
-            .await
-            .map_err(Error::UnreachableApi)?;
-
-        let samples = response
-            .json::<Vec<Sample>>()
-            .await
-            .map_err(Error::ResponseDeserializationFailed)?;
-
-        if samples.is_empty() {
-            Err(Error::NoEnvSamples)
-        } else {
-            Ok(samples)
-        }
+        self.get_samples(from).await
     }
 }
