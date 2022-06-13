@@ -5,6 +5,7 @@ use serde::Deserialize;
 use std::{
     fmt::{Display, Formatter},
     sync::Arc,
+    time::Duration,
 };
 
 #[derive(Deserialize, Debug, Clone)]
@@ -23,6 +24,7 @@ pub struct Sample {
 
 impl Sample {
     pub fn format_as_markdown(&self) -> String {
+        // TODO: indicate if reading is above or below optimal range
         format!(
             "```\n\
             🌡 temperature: {} °C\n\
@@ -86,7 +88,7 @@ impl BackendApi {
     }
 
     async fn request(&self, path: &str) -> Result<Response, BackendApiError> {
-        let backend_url = &self.config.meteos_backend_url;
+        let backend_url = &self.config.backend_url;
         let request_url = format!("{backend_url}/{path}");
         let response =
             reqwest::get(request_url)
@@ -119,9 +121,12 @@ impl BackendApi {
         }
     }
 
-    pub async fn get_latest_samples(&self) -> Result<Vec<Sample>, BackendApiError> {
+    pub async fn get_latest_samples(
+        &self,
+        period: Duration,
+    ) -> Result<Vec<Sample>, BackendApiError> {
         let now: chrono::DateTime<chrono::Utc> = std::time::SystemTime::now().into();
-        let period = chrono::Duration::seconds(self.config.latest_samples_period_sec as i64);
+        let period = chrono::Duration::from_std(period).expect("failed to parse duration");
         let from = now
             .checked_sub_signed(period)
             .expect("failed to substruct duration");

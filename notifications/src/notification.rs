@@ -5,8 +5,8 @@ use crate::{
 use std::{fmt::Debug, time::Duration};
 
 #[derive(Debug)]
-pub struct EnvOutOfRangeNotification {
-    pub readings_out_or_range: Vec<Reading>,
+pub struct NotOptimalEnviromentalReadingsNotification {
+    pub readings_out_of_range: Vec<Reading>,
     pub latest_sample: Sample,
 }
 
@@ -23,13 +23,13 @@ pub struct BackendErrorNotification {
 // trait Notification: GetTgMessage + GetEmailMessage + GetSmsMessage {}
 pub trait Notification: GetTgMessage {}
 
-impl Notification for EnvOutOfRangeNotification {}
+impl Notification for NotOptimalEnviromentalReadingsNotification {}
 impl Notification for BackendErrorNotification {}
 
-impl GetTgMessage for EnvOutOfRangeNotification {
+impl GetTgMessage for NotOptimalEnviromentalReadingsNotification {
     fn get_tg_message(&self) -> TgMessage {
         let readings: Vec<String> = self
-            .readings_out_or_range
+            .readings_out_of_range
             .iter()
             .map(|r| format!("{}", r))
             .collect();
@@ -38,7 +38,7 @@ impl GetTgMessage for EnvOutOfRangeNotification {
         TgMessage {
             format: TgMessageFormat::MarkdownV2,
             text: format!(
-                "{readings} is \\(are\\) out of normal range\n\n\
+                "{readings} is \\(are\\) out of optimal range\n\n\
                 {latest_sample_md}",
                 latest_sample_md = self.latest_sample.format_as_markdown()
             ),

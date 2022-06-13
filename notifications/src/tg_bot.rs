@@ -4,7 +4,7 @@ use crate::{
     subscriptions::{Subscriptions, TgChat, TgChatPrivate, TgChatPublic, TgSubscription},
 };
 use anyhow::{Context, Result};
-use std::{fmt::Debug, sync::Arc};
+use std::{fmt::Debug, sync::Arc, time::Duration};
 use teloxide::{
     adaptors::AutoSend,
     payloads::SendMessageSetters,
@@ -19,6 +19,7 @@ pub struct TgBot {
     bot: AutoSend<Bot>,
     subs: Arc<Mutex<Subscriptions>>,
     backend_api: Arc<BackendApi>,
+    config: Arc<Config>,
 }
 
 pub struct TgMessage {
@@ -38,6 +39,7 @@ pub trait GetTgMessage: Debug {
 struct Ctx {
     pub subs: Arc<Mutex<Subscriptions>>,
     pub backend_api: Arc<BackendApi>,
+    pub config: Arc<Config>,
 }
 
 impl TgBot {
@@ -51,6 +53,7 @@ impl TgBot {
             bot,
             subs,
             backend_api,
+            config,
         }
     }
 
@@ -60,6 +63,7 @@ impl TgBot {
         let ctx = Ctx {
             subs: self.subs.clone(),
             backend_api: self.backend_api.clone(),
+            config: self.config.clone(),
         };
 
         let command_handler_with_context =
@@ -148,9 +152,12 @@ async fn on_command_env(
     message: teloxide::types::Message,
     ctx: Ctx,
 ) -> Result<()> {
-    let samples = ctx.backend_api.get_latest_samples().await;
+    let latest_samples = ctx
+        .backend_api
+        .get_latest_samples(Duration::from_secs(ctx.config.check_period_sec))
+        .await;
 
-    let outgoing_message = match samples {
+    let outgoing_message = match latest_samples {
         Ok(samples) => TgMessage {
             format: TgMessageFormat::MarkdownV2,
             text: samples[samples.len() - 1].format_as_markdown(),

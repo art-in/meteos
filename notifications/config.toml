@@ -1,17 +1,24 @@
-# url of Meteos backend to fetch environment samples from
-meteos_backend_url = "https://artin.space/meteos/api"
+# where to fetch environment samples from
+backend_url = "https://artin.space/meteos/api"
 
-# token of telegram bot that is used for subscribing to notifications and
-# sending notification messages to subscribed users
+# what telegram bot to use for subscribing and broadcasting notifications
 tg_bot_token = "5366431629:AAEZnMxpZoRTIhSwkfBxX1fHrUJSu6ELl8s"
 
 # how often to check environment conditions
 check_interval_sec = 30
 
-# what period to use for fetching latest environment samples from backend.
+# samples from what latest period to use for checking environment conditions.
 # this should be equal or longer than sampling interval, otherwise no samples may
 # be received from backend, which is considered error
-latest_samples_period_sec = 60
+check_period_sec = 60
 
-# how long to wait for successful backend response until sending error notification
+# how long to wait for successful backend response after receiving first error 
+# until broadcasting error notification
 backend_error_timeout_sec = 30
+
+# what environment conditions are considered optimal 
+[optimal_ranges]
+temperature = [20, 25]
+humidity = [30, 60]
+co2 = [0, 900]
+pressure = [750, 770]

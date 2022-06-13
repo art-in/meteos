@@ -1,7 +1,7 @@
 use crate::{
     backend_api::{BackendApi, Reading},
     config::Config,
-    notification::{BackendErrorNotification, EnvOutOfRangeNotification},
+    notification::{BackendErrorNotification, NotOptimalEnviromentalReadingsNotification},
     notifier::Notifier,
 };
 use anyhow::Result;
@@ -22,7 +22,9 @@ pub async fn start(
     config: Arc<Config>,
     backend_api: Arc<BackendApi>,
 ) -> Result<()> {
+    // TODO: impl duration getters for Config
     let check_interval = Duration::from_secs(config.check_interval_sec);
+    let check_period = Duration::from_secs(config.check_period_sec);
     let backend_error_timeout = Duration::from_secs(config.backend_error_timeout_sec);
 
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
@@ -30,48 +32,54 @@ pub async fn start(
 
     loop {
         log::debug!("new check loop iteration");
-        let samples = backend_api.get_latest_samples().await;
+        let latest_samples = backend_api.get_latest_samples(check_period).await;
 
-        log::trace!("received samples: {:?}", samples);
+        log::trace!("received samples: {:?}", latest_samples);
 
-        match samples {
+        match latest_samples {
             Ok(samples) => {
                 consecutive_errors = None;
 
-                // only broadcast notification if certain reading is out of normal range in all
+                let mut readings_out_of_range = Vec::new();
+
+                // only broadcast notification if certain reading is out of optimal range in all
                 // samples of check period. this should smooth short spikes of certain reading.
                 // eg. when co2 goes beyond range max for one minute when human is too close to
                 // the sensor, we don't want to raise alarm for that
-                let latest_sample = &samples[samples.len() - 1];
-                let mut readings_out_or_range = Vec::new();
-
-                // TODO: move ranges to config
                 if samples
                     .iter()
-                    .all(|s| s.temperature < 20.0 || s.temperature > 25.0)
+                    .all(|s| !config.optimal_ranges.temperature.contains(&s.temperature))
                 {
-                    readings_out_or_range.push(Reading::Temperature);
+                    readings_out_of_range.push(Reading::Temperature);
                 }
 
                 if samples
                     .iter()
-                    .all(|s| s.humidity < 30.0 || s.humidity > 60.0)
+                    .all(|s| !config.optimal_ranges.humidity.contains(&s.humidity))
                 {
-                    readings_out_or_range.push(Reading::Humidity);
+                    readings_out_of_range.push(Reading::Humidity);
                 }
 
-                if samples.iter().all(|s| s.co2 > 900.0) {
-                    readings_out_or_range.push(Reading::Co2);
+                if samples
+                    .iter()
+                    .all(|s| !config.optimal_ranges.co2.contains(&s.co2))
+                {
+                    readings_out_of_range.push(Reading::Co2);
                 }
 
-                // TODO: check pressure
+                if samples
+                    .iter()
+                    .all(|s| !config.optimal_ranges.pressure.contains(&s.pressure))
+                {
+                    readings_out_of_range.push(Reading::Pressure);
+                }
 
-                if !readings_out_or_range.is_empty() {
+                if !readings_out_of_range.is_empty() {
                     if !is_out_of_range_notification_sent {
                         notifier
-                            .broadcast(Box::new(EnvOutOfRangeNotification {
-                                readings_out_or_range,
-                                latest_sample: latest_sample.clone(),
+                            .broadcast(Box::new(NotOptimalEnviromentalReadingsNotification {
+                                readings_out_of_range,
+                                latest_sample: samples[samples.len() - 1].clone(),
                             }))
                             .await?;
                         is_out_of_range_notification_sent = true;
