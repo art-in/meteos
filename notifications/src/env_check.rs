@@ -22,17 +22,12 @@ pub async fn start(
     config: Arc<Config>,
     backend_api: Arc<BackendApi>,
 ) -> Result<()> {
-    // TODO: impl duration getters for Config
-    let check_interval = Duration::from_secs(config.check_interval_sec);
-    let check_period = Duration::from_secs(config.check_period_sec);
-    let backend_error_timeout = Duration::from_secs(config.backend_error_timeout_sec);
-
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
     let mut is_out_of_range_notification_sent = false;
 
     loop {
         log::debug!("new check loop iteration");
-        let latest_samples = backend_api.get_latest_samples(check_period).await;
+        let latest_samples = backend_api.get_latest_samples(config.check_period).await;
 
         log::trace!("received samples: {:?}", latest_samples);
 
@@ -110,7 +105,7 @@ pub async fn start(
 
                             consecutive_errors.error_count += 1;
 
-                            if error_period >= backend_error_timeout {
+                            if error_period >= config.backend_error_timeout {
                                 notifier
                                     .broadcast(Box::new(BackendErrorNotification {
                                         latest_error: error,
@@ -126,6 +121,6 @@ pub async fn start(
             }
         }
 
-        tokio::time::sleep(check_interval).await;
+        tokio::time::sleep(config.check_interval).await;
     }
 }

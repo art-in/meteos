@@ -4,7 +4,7 @@ use crate::{
     subscriptions::{Subscriptions, TgChat, TgChatPrivate, TgChatPublic, TgSubscription},
 };
 use anyhow::{Context, Result};
-use std::{fmt::Debug, sync::Arc, time::Duration};
+use std::{fmt::Debug, sync::Arc};
 use teloxide::{
     adaptors::AutoSend,
     payloads::SendMessageSetters,
@@ -154,7 +154,7 @@ async fn on_command_env(
 ) -> Result<()> {
     let latest_samples = ctx
         .backend_api
-        .get_latest_samples(Duration::from_secs(ctx.config.check_period_sec))
+        .get_latest_samples(ctx.config.check_period)
         .await;
 
     let outgoing_message = match latest_samples {
