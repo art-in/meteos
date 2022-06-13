@@ -1,61 +1,7 @@
-use crate::config::Config;
+use crate::{config::Config, sample::Sample};
 use chrono::{DateTime, Utc};
 use reqwest::{Response, StatusCode};
-use serde::Deserialize;
-use std::{
-    fmt::{Display, Formatter},
-    sync::Arc,
-    time::Duration,
-};
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct Sample {
-    #[serde(alias = "c")]
-    pub co2: f64,
-    #[serde(alias = "h")]
-    pub humidity: f64,
-    #[serde(alias = "p")]
-    pub pressure: f64,
-    #[serde(alias = "t")]
-    pub temperature: f64,
-    #[serde(alias = "u")]
-    pub time: String,
-}
-
-impl Sample {
-    pub fn format_as_markdown(&self) -> String {
-        // TODO: indicate if reading is above or below optimal range
-        format!(
-            "```\n\
-            🌡 temperature: {} °C\n\
-            💧 humidity:    {} %\n\
-            🔨 pressure:    {} mm/hg\n\
-            💨 co2:         {} ppm\n\
-            ```",
-            self.temperature, self.humidity, self.pressure, self.co2
-        )
-    }
-}
-
-#[derive(Debug)]
-pub enum Reading {
-    Co2,
-    Humidity,
-    Pressure,
-    Temperature,
-}
-
-impl Display for Reading {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            Reading::Co2 => "co2",
-            Reading::Humidity => "humidity",
-            Reading::Pressure => "pressure",
-            Reading::Temperature => "temperature",
-        };
-        write!(f, "{}", message)
-    }
-}
+use std::{sync::Arc, time::Duration};
 
 #[derive(thiserror::Error, Debug)]
 pub enum BackendApiError {

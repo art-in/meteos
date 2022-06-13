@@ -9,12 +9,15 @@ use notifier::Notifier;
 use std::sync::Arc;
 
 mod backend_api;
+mod check;
 mod config;
-mod env_check;
 mod notification;
 mod notifier;
+mod reading;
+mod sample;
 mod subscriptions;
 mod tg_bot;
+mod utils;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,17 +31,17 @@ async fn main() -> Result<()> {
     );
     let notifier_clone = notifier.clone();
 
-    let subscription_service_task = async move {
+    let subscription_task = async move {
         notifier.start_subscription_service().await;
     };
 
-    let env_check_task = async move {
-        env_check::start(notifier_clone, config, backend_api)
+    let check_task = async move {
+        check::start(notifier_clone, config, backend_api)
             .await
             .expect("failed to run environment check service");
     };
 
-    tokio::join!(subscription_service_task, env_check_task);
+    tokio::join!(subscription_task, check_task);
 
     Ok(())
 }

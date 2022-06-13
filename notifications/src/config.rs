@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::{fs::File, io::Read, ops::Range, time::Duration};
 
-#[derive(serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct EnvironmentalReadingRanges {
     pub temperature: Range<f64>,
     pub humidity: Range<f64>,

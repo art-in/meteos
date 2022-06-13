@@ -160,7 +160,7 @@ async fn on_command_env(
     let outgoing_message = match latest_samples {
         Ok(samples) => TgMessage {
             format: TgMessageFormat::MarkdownV2,
-            text: samples[samples.len() - 1].format_as_markdown(),
+            text: samples[samples.len() - 1].format_as_markdown(&ctx.config.optimal_ranges),
         },
         Err(error) => {
             log::error!("{}", error);

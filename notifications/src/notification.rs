@@ -1,13 +1,18 @@
 use crate::{
-    backend_api::{self, Reading, Sample},
+    backend_api,
+    config::EnvironmentalReadingRanges,
+    reading::ReadingOptimality,
+    sample::Sample,
     tg_bot::{GetTgMessage, TgMessage, TgMessageFormat},
+    utils::beautiful_string_join,
 };
 use std::{fmt::Debug, time::Duration};
 
 #[derive(Debug)]
-pub struct NotOptimalEnviromentalReadingsNotification {
-    pub readings_out_of_range: Vec<Reading>,
+pub struct NotOptimalEnvironmentalReadingsNotification {
+    pub not_optimal_readings: Vec<ReadingOptimality>,
     pub latest_sample: Sample,
+    pub optimal_ranges: EnvironmentalReadingRanges,
 }
 
 #[derive(Debug)]
@@ -23,24 +28,24 @@ pub struct BackendErrorNotification {
 // trait Notification: GetTgMessage + GetEmailMessage + GetSmsMessage {}
 pub trait Notification: GetTgMessage {}
 
-impl Notification for NotOptimalEnviromentalReadingsNotification {}
+impl Notification for NotOptimalEnvironmentalReadingsNotification {}
 impl Notification for BackendErrorNotification {}
 
-impl GetTgMessage for NotOptimalEnviromentalReadingsNotification {
+impl GetTgMessage for NotOptimalEnvironmentalReadingsNotification {
     fn get_tg_message(&self) -> TgMessage {
-        let readings: Vec<String> = self
-            .readings_out_of_range
+        let reading_statuses: Vec<&str> = self
+            .not_optimal_readings
             .iter()
-            .map(|r| format!("{}", r))
+            .map(|r| r.get_reading_status_string())
             .collect();
-        let readings = readings.join(", ");
 
         TgMessage {
             format: TgMessageFormat::MarkdownV2,
             text: format!(
-                "{readings} is \\(are\\) out of optimal range\n\n\
+                "{status}\n\n\
                 {latest_sample_md}",
-                latest_sample_md = self.latest_sample.format_as_markdown()
+                status = beautiful_string_join(reading_statuses),
+                latest_sample_md = self.latest_sample.format_as_markdown(&self.optimal_ranges)
             ),
         }
     }

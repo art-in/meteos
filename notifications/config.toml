@@ -18,7 +18,7 @@ backend_error_timeout_sec = 30
 
 # what environment conditions are considered optimal 
 [optimal_ranges]
-temperature = [20, 25]
-humidity = [30, 60]
+temperature = [20, 26]
+humidity = [25, 60]
 co2 = [0, 900]
 pressure = [750, 770]

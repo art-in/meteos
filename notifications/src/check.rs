@@ -1,14 +1,12 @@
 use crate::{
-    backend_api::{BackendApi, Reading},
+    backend_api::BackendApi,
     config::Config,
-    notification::{BackendErrorNotification, NotOptimalEnviromentalReadingsNotification},
+    notification::{BackendErrorNotification, NotOptimalEnvironmentalReadingsNotification},
     notifier::Notifier,
+    reading::{get_all_readings_optimality, Optimality, Reading, ReadingOptimality},
 };
 use anyhow::Result;
-use std::{
-    sync::Arc,
-    time::{Duration, Instant},
-};
+use std::{sync::Arc, time::Instant};
 
 #[derive(Debug)]
 struct ConsecutiveErrors {
@@ -23,7 +21,7 @@ pub async fn start(
     backend_api: Arc<BackendApi>,
 ) -> Result<()> {
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
-    let mut is_out_of_range_notification_sent = false;
+    let mut is_not_optimal_readings_notification_sent = false;
 
     loop {
         log::debug!("new check loop iteration");
@@ -35,56 +33,66 @@ pub async fn start(
             Ok(samples) => {
                 consecutive_errors = None;
 
-                let mut readings_out_of_range = Vec::new();
+                let readings_optimality = vec![
+                    ReadingOptimality {
+                        reading: Reading::Temperature,
+                        optimality: get_all_readings_optimality(
+                            samples.iter().map(|s| s.temperature).collect(),
+                            &config.optimal_ranges.temperature,
+                        ),
+                    },
+                    ReadingOptimality {
+                        reading: Reading::Humidity,
+                        optimality: get_all_readings_optimality(
+                            samples.iter().map(|s| s.humidity).collect(),
+                            &config.optimal_ranges.humidity,
+                        ),
+                    },
+                    ReadingOptimality {
+                        reading: Reading::Pressure,
+                        optimality: get_all_readings_optimality(
+                            samples.iter().map(|s| s.pressure).collect(),
+                            &config.optimal_ranges.pressure,
+                        ),
+                    },
+                    ReadingOptimality {
+                        reading: Reading::Co2,
+                        optimality: get_all_readings_optimality(
+                            samples.iter().map(|s| s.co2).collect(),
+                            &config.optimal_ranges.co2,
+                        ),
+                    },
+                ];
 
-                // only broadcast notification if certain reading is out of optimal range in all
-                // samples of check period. this should smooth short spikes of certain reading.
+                // only broadcast notification if certain reading is not optimal in all samples of
+                // check period. this should smooth short-time spikes
                 // eg. when co2 goes beyond range max for one minute when human is too close to
                 // the sensor, we don't want to raise alarm for that
-                if samples
+                let not_optimal_readings: Vec<ReadingOptimality> = readings_optimality
                     .iter()
-                    .all(|s| !config.optimal_ranges.temperature.contains(&s.temperature))
-                {
-                    readings_out_of_range.push(Reading::Temperature);
-                }
+                    .copied()
+                    .filter(|ro| {
+                        ro.optimality != Optimality::Optimal && ro.optimality != Optimality::Mixed
+                    })
+                    .collect();
 
-                if samples
-                    .iter()
-                    .all(|s| !config.optimal_ranges.humidity.contains(&s.humidity))
-                {
-                    readings_out_of_range.push(Reading::Humidity);
-                }
-
-                if samples
-                    .iter()
-                    .all(|s| !config.optimal_ranges.co2.contains(&s.co2))
-                {
-                    readings_out_of_range.push(Reading::Co2);
-                }
-
-                if samples
-                    .iter()
-                    .all(|s| !config.optimal_ranges.pressure.contains(&s.pressure))
-                {
-                    readings_out_of_range.push(Reading::Pressure);
-                }
-
-                if !readings_out_of_range.is_empty() {
-                    if !is_out_of_range_notification_sent {
+                if !not_optimal_readings.is_empty() {
+                    if !is_not_optimal_readings_notification_sent {
                         notifier
-                            .broadcast(Box::new(NotOptimalEnviromentalReadingsNotification {
-                                readings_out_of_range,
+                            .broadcast(Box::new(NotOptimalEnvironmentalReadingsNotification {
+                                not_optimal_readings,
                                 latest_sample: samples[samples.len() - 1].clone(),
+                                optimal_ranges: config.optimal_ranges.clone(),
                             }))
                             .await?;
-                        is_out_of_range_notification_sent = true;
+                        is_not_optimal_readings_notification_sent = true;
                     }
                 } else {
-                    is_out_of_range_notification_sent = false;
+                    is_not_optimal_readings_notification_sent = false;
                 }
             }
             Err(error) => {
-                is_out_of_range_notification_sent = false;
+                is_not_optimal_readings_notification_sent = false;
                 log::trace!("{:?}", consecutive_errors);
                 log::error!("{}", error);
 
