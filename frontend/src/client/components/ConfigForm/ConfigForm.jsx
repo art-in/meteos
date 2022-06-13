@@ -77,6 +77,7 @@ function ConfigForm() {
     };
   }, [isConnected, disconnect]);
 
+  // TODO: add telegram notifications subscribe link
   return (
     <form className={classes.root} autoComplete="off" ref={formRef}>
       <div className={classes.field}>
