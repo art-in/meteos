@@ -13,11 +13,10 @@ use teloxide::{
     utils::command::BotCommands,
     Bot,
 };
-use tokio::sync::Mutex;
 
 pub struct TgBot {
     bot: AutoSend<Bot>,
-    subs: Arc<Mutex<Subscriptions>>,
+    subs: Arc<Subscriptions>,
     backend_api: Arc<BackendApi>,
     config: Arc<Config>,
 }
@@ -36,15 +35,15 @@ pub trait GetTgMessage: Debug {
     fn get_tg_message(&self) -> TgMessage;
 }
 #[derive(Clone)]
-struct Ctx {
-    pub subs: Arc<Mutex<Subscriptions>>,
+struct CommandHandlerContext {
+    pub subs: Arc<Subscriptions>,
     pub backend_api: Arc<BackendApi>,
     pub config: Arc<Config>,
 }
 
 impl TgBot {
     pub fn new(
-        subs: Arc<Mutex<Subscriptions>>,
+        subs: Arc<Subscriptions>,
         config: Arc<Config>,
         backend_api: Arc<BackendApi>,
     ) -> Self {
@@ -60,7 +59,7 @@ impl TgBot {
     pub async fn start_command_server(&self) {
         log::debug!("starting command server...");
 
-        let ctx = Ctx {
+        let ctx = CommandHandlerContext {
             subs: self.subs.clone(),
             backend_api: self.backend_api.clone(),
             config: self.config.clone(),
@@ -109,8 +108,8 @@ enum Command {
     Start,
     #[command(description = "show available commands")]
     Help,
-    #[command(description = "show latest environment data")]
-    Env,
+    #[command(description = "show latest environment sample", rename = "snake_case")]
+    LatestSample,
     #[command(description = "subscribe to notifications")]
     Subscribe,
     #[command(description = "unsubscribe from notifications")]
@@ -121,12 +120,12 @@ async fn command_handler(
     bot: AutoSend<Bot>,
     message: teloxide::types::Message,
     command: Command,
-    ctx: Ctx,
+    ctx: CommandHandlerContext,
 ) -> Result<()> {
     match command {
         Command::Start => on_command_help(bot, message).await?,
         Command::Help => on_command_help(bot, message).await?,
-        Command::Env => on_command_env(bot, message, ctx).await?,
+        Command::LatestSample => on_command_latest_sample(bot, message, ctx).await?,
         Command::Subscribe => on_command_subscribe(bot, message, ctx).await?,
         Command::Unsubscribe => on_command_unsubscribe(bot, message, ctx).await?,
     };
@@ -148,12 +147,12 @@ async fn on_command_help(bot: AutoSend<Bot>, message: teloxide::types::Message) 
     Ok(())
 }
 
-async fn on_command_env(
+async fn on_command_latest_sample(
     bot: AutoSend<Bot>,
     message: teloxide::types::Message,
-    ctx: Ctx,
+    ctx: CommandHandlerContext,
 ) -> Result<()> {
-    log::trace!("on_command_env: message={:?}", message);
+    log::trace!("on_command_latest_sample: message={:?}", message);
     let latest_samples = ctx
         .backend_api
         .get_latest_samples(ctx.config.check_period)
@@ -181,7 +180,7 @@ async fn on_command_env(
 async fn on_command_subscribe(
     bot: AutoSend<Bot>,
     message: teloxide::types::Message,
-    ctx: Ctx,
+    ctx: CommandHandlerContext,
 ) -> Result<()> {
     log::trace!("on_command_subscribe: message={:?}", message);
     let sub = TgSubscription {
@@ -201,8 +200,6 @@ async fn on_command_subscribe(
 
     let is_new_sub = ctx
         .subs
-        .lock()
-        .await
         .add_tg_sub(sub)
         .context("failed to add telegram subscription")?;
 
@@ -211,7 +208,7 @@ async fn on_command_subscribe(
         text: if is_new_sub {
             "You are subscribed to notifications!".into()
         } else {
-            "You have already been subscribed before.".into()
+            "You was already subscribed before.".into()
         },
     };
 
@@ -223,13 +220,11 @@ async fn on_command_subscribe(
 async fn on_command_unsubscribe(
     bot: AutoSend<Bot>,
     message: teloxide::types::Message,
-    ctx: Ctx,
+    ctx: CommandHandlerContext,
 ) -> Result<()> {
     log::trace!("on_command_unsubscribe: message={:?}", message);
     let was_existing_sub = ctx
         .subs
-        .lock()
-        .await
         .remove_tg_sub(message.chat.id.0)
         .context("failed to remove telegram subscription")?;
 

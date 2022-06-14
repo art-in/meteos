@@ -2,14 +2,6 @@ use anyhow::Result;
 use log::LevelFilter;
 use std::{fs::File, io::Read, ops::Range, time::Duration};
 
-#[derive(Debug, serde::Deserialize, Clone)]
-pub struct EnvironmentalReadingRanges {
-    pub temperature: Range<f64>,
-    pub humidity: Range<f64>,
-    pub co2: Range<f64>,
-    pub pressure: Range<f64>,
-}
-
 #[derive(Debug, serde::Deserialize)]
 pub struct Config {
     pub log_level: LevelFilter,
@@ -18,7 +10,7 @@ pub struct Config {
     check_interval_sec: u64,
     check_period_sec: u64,
     backend_error_timeout_sec: u64,
-    pub optimal_ranges: EnvironmentalReadingRanges,
+    pub optimal_ranges: ReadingRanges,
 
     #[serde(skip)]
     pub check_interval: Duration,
@@ -28,6 +20,14 @@ pub struct Config {
 
     #[serde(skip)]
     pub backend_error_timeout: Duration,
+}
+
+#[derive(Debug, serde::Deserialize, Clone)]
+pub struct ReadingRanges {
+    pub temperature: Range<f64>,
+    pub humidity: Range<f64>,
+    pub co2: Range<f64>,
+    pub pressure: Range<f64>,
 }
 
 impl Config {

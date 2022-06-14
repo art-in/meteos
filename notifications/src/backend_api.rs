@@ -9,8 +9,8 @@ pub enum BackendApiError {
     UnreachableApi { source: UnreachableApiError },
     #[error("failed to parse Meteos API response: {}", .source)]
     ResponseDeserializationFailed { source: reqwest::Error },
-    #[error("no environment samples received from Meteos API")]
-    NoEnvSamples,
+    #[error("no environment samples received from Meteos API for period from {}", .from)]
+    NoEnvSamples { from: DateTime<Utc> },
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -53,15 +53,15 @@ impl BackendApi {
     }
 
     pub async fn get_samples(&self, from: DateTime<Utc>) -> Result<Vec<Sample>, BackendApiError> {
-        let from = from.to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
-        let response = self.request(&format!("samples?from={from}")).await?;
+        let from_str = from.to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+        let response = self.request(&format!("samples?from={from_str}")).await?;
         let samples = response
             .json::<Vec<Sample>>()
             .await
             .map_err(|err| BackendApiError::ResponseDeserializationFailed { source: err })?;
 
         if samples.is_empty() {
-            Err(BackendApiError::NoEnvSamples)
+            Err(BackendApiError::NoEnvSamples { from })
         } else {
             Ok(samples)
         }

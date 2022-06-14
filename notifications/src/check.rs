@@ -1,7 +1,7 @@
 use crate::{
     backend_api::BackendApi,
     config::Config,
-    notification::{BackendErrorNotification, NotOptimalEnvironmentalReadingsNotification},
+    notification::{BackendErrorNotification, NotOptimalReadingsNotification},
     notifier::Notifier,
     reading::{get_all_readings_optimality, Optimality, Reading, ReadingOptimality},
 };
@@ -82,7 +82,7 @@ pub async fn start(
                     log::trace!("not optimal readings: {:?}", not_optimal_readings);
                     if !is_not_optimal_readings_notification_sent {
                         notifier
-                            .broadcast(Box::new(NotOptimalEnvironmentalReadingsNotification {
+                            .broadcast(Box::new(NotOptimalReadingsNotification {
                                 not_optimal_readings,
                                 latest_sample: samples[samples.len() - 1].clone(),
                                 optimal_ranges: config.optimal_ranges.clone(),
@@ -107,7 +107,7 @@ pub async fn start(
                     None => {
                         consecutive_errors = Some(ConsecutiveErrors {
                             first_error_time: Instant::now(),
-                            error_count: 0,
+                            error_count: 1,
                             notification_broadcasted: false,
                         });
                     }

@@ -1,6 +1,6 @@
 use crate::{
     backend_api,
-    config::EnvironmentalReadingRanges,
+    config::ReadingRanges,
     reading::ReadingOptimality,
     sample::Sample,
     tg_bot::{GetTgMessage, TgMessage, TgMessageFormat},
@@ -9,10 +9,10 @@ use crate::{
 use std::{fmt::Debug, time::Duration};
 
 #[derive(Debug)]
-pub struct NotOptimalEnvironmentalReadingsNotification {
+pub struct NotOptimalReadingsNotification {
     pub not_optimal_readings: Vec<ReadingOptimality>,
     pub latest_sample: Sample,
-    pub optimal_ranges: EnvironmentalReadingRanges,
+    pub optimal_ranges: ReadingRanges,
 }
 
 #[derive(Debug)]
@@ -28,15 +28,15 @@ pub struct BackendErrorNotification {
 // trait Notification: GetTgMessage + GetEmailMessage + GetSmsMessage {}
 pub trait Notification: GetTgMessage {}
 
-impl Notification for NotOptimalEnvironmentalReadingsNotification {}
+impl Notification for NotOptimalReadingsNotification {}
 impl Notification for BackendErrorNotification {}
 
-impl GetTgMessage for NotOptimalEnvironmentalReadingsNotification {
+impl GetTgMessage for NotOptimalReadingsNotification {
     fn get_tg_message(&self) -> TgMessage {
         let reading_statuses: Vec<&str> = self
             .not_optimal_readings
             .iter()
-            .map(|r| r.get_reading_status_string())
+            .map(|r| r.format_as_status_string())
             .collect();
 
         TgMessage {

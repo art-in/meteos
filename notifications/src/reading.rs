@@ -2,10 +2,10 @@ use std::ops::Range;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Reading {
-    Co2,
+    Temperature,
     Humidity,
     Pressure,
-    Temperature,
+    Co2,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -23,7 +23,7 @@ pub struct ReadingOptimality {
 }
 
 impl ReadingOptimality {
-    pub fn get_reading_status_string(&self) -> &'static str {
+    pub fn format_as_status_string(&self) -> &'static str {
         match self.reading {
             Reading::Temperature => match self.optimality {
                 Optimality::AboveOptimal => "too hot 🥵",
@@ -50,6 +50,16 @@ impl ReadingOptimality {
                 Optimality::Mixed => "fast changing co2",
             },
         }
+    }
+}
+
+pub fn get_reading_optimality(reading: f64, optimal_range: &Range<f64>) -> Optimality {
+    if reading < optimal_range.start {
+        Optimality::BelowOptimal
+    } else if reading > optimal_range.end {
+        Optimality::AboveOptimal
+    } else {
+        Optimality::Optimal
     }
 }
 

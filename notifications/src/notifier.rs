@@ -4,18 +4,15 @@ use crate::{
 };
 use anyhow::{Context, Result};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 pub struct Notifier {
-    subs: Arc<Mutex<Subscriptions>>,
+    subs: Arc<Subscriptions>,
     tg_bot: TgBot,
 }
 
 impl Notifier {
     pub fn init(config: Arc<Config>, backend_api: Arc<BackendApi>) -> Result<Self> {
-        let subs = Arc::new(Mutex::new(
-            Subscriptions::load().context("failed to load subscriptions")?,
-        ));
+        let subs = Arc::new(Subscriptions::load().context("failed to load subscriptions")?);
         let tg_bot = TgBot::new(subs.clone(), config, backend_api);
         Ok(Notifier { subs, tg_bot })
     }
@@ -24,9 +21,9 @@ impl Notifier {
         self.tg_bot.start_command_server().await;
     }
 
-    pub async fn broadcast(&self, notification: Box<dyn Notification + Send + Sync>) -> Result<()> {
-        let subs = self.subs.lock().await;
-        let tg_subs = subs
+    pub async fn broadcast(&self, notification: Box<dyn Notification>) -> Result<()> {
+        let tg_subs = self
+            .subs
             .get_tg_subs()
             .context("failed to get telegram subscriptions")?;
 

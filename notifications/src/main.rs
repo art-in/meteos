@@ -33,16 +33,21 @@ async fn main() -> Result<()> {
     let notifier = Arc::new(
         Notifier::init(config.clone(), backend_api.clone()).context("failed to init notifier")?,
     );
-    let notifier_clone = notifier.clone();
 
-    let subscription_task = async move {
-        notifier.start_subscription_service().await;
+    let subscription_task = {
+        let notifier = notifier.clone();
+        async move {
+            notifier.start_subscription_service().await;
+        }
     };
 
-    let check_task = async move {
-        check::start(notifier_clone, config, backend_api)
-            .await
-            .expect("failed to run environment check service");
+    let check_task = {
+        let notifier = notifier.clone();
+        async move {
+            check::start(notifier, config, backend_api)
+                .await
+                .expect("failed to run environment check service");
+        }
     };
 
     tokio::join!(subscription_task, check_task);
