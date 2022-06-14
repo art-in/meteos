@@ -11,6 +11,7 @@ Home weather station on [ESP32](https://en.wikipedia.org/wiki/ESP32) with databa
  - configuring sensor over bluetooth
  - on-board display to show current readings
  - browser web app to show history charts
+ - notifications through Telegram bot
 
 ---
 
