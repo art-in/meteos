@@ -26,17 +26,17 @@ impl Notifier {
 
     pub async fn broadcast(&self, notification: Box<dyn Notification + Send + Sync>) -> Result<()> {
         let subs = self.subs.lock().await;
-        let subs = subs
+        let tg_subs = subs
             .get_tg_subs()
             .context("failed to get telegram subscriptions")?;
 
-        log::debug!(
-            "Notifier::broadcast(subs_count={subs_count}, notification={notification:?})",
-            subs_count = subs.len(),
+        log::trace!(
+            "broadcast: tg_subs_count={tg_subs_count}, notification={notification:?}",
+            tg_subs_count = tg_subs.len(),
             notification = notification
         );
 
-        for sub in &subs {
+        for sub in &tg_subs {
             let res = self
                 .tg_bot
                 .send_message(sub.chat_id, notification.get_tg_message())

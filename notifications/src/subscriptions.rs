@@ -42,6 +42,8 @@ pub struct Subscriptions {
 
 impl Subscriptions {
     pub fn load() -> Result<Self> {
+        log::debug!("loading subscriptions...");
+
         create_dir_all("db").context("failed to create database directory")?;
 
         let db = FileDatabase::<DbData, Ron>::load_from_path_or_else("db/db.ron", DbData::default)

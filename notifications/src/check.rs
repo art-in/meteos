@@ -20,17 +20,19 @@ pub async fn start(
     config: Arc<Config>,
     backend_api: Arc<BackendApi>,
 ) -> Result<()> {
+    log::debug!("starting check loop...");
+
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
     let mut is_not_optimal_readings_notification_sent = false;
 
     loop {
-        log::debug!("new check loop iteration");
+        log::trace!("next iteration");
         let latest_samples = backend_api.get_latest_samples(config.check_period).await;
-
-        log::trace!("received samples: {:?}", latest_samples);
 
         match latest_samples {
             Ok(samples) => {
+                log::trace!("received samples: {:?}", samples);
+
                 consecutive_errors = None;
 
                 let readings_optimality = vec![
@@ -77,6 +79,7 @@ pub async fn start(
                     .collect();
 
                 if !not_optimal_readings.is_empty() {
+                    log::trace!("not optimal readings: {:?}", not_optimal_readings);
                     if !is_not_optimal_readings_notification_sent {
                         notifier
                             .broadcast(Box::new(NotOptimalEnvironmentalReadingsNotification {
@@ -88,13 +91,15 @@ pub async fn start(
                         is_not_optimal_readings_notification_sent = true;
                     }
                 } else {
+                    log::trace!("all readings are optimal");
                     is_not_optimal_readings_notification_sent = false;
                 }
             }
             Err(error) => {
+                log::error!("backend error: {}", error);
+                log::trace!("previous errors: {:?}", consecutive_errors);
+
                 is_not_optimal_readings_notification_sent = false;
-                log::trace!("{:?}", consecutive_errors);
-                log::error!("{}", error);
 
                 // do not broadcast error notification immediately after first error, give it some
                 // time and broadcast only if it consistently failing for some period of time

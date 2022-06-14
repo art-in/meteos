@@ -6,4 +6,4 @@
 cd $(dirname $(realpath "$0")) && cd ..
 
 # run
-RUST_LOG=meteos target/release/meteos-notifications 
+target/release/meteos-notifications 

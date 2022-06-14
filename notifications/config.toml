@@ -1,3 +1,7 @@
+# what level to use for filtering log messages dropped to stdout.
+# eg. "trace", "debug", "info", "warn", "error"
+log_level = "info"
+
 # where to fetch environment samples from
 backend_url = "https://example.org/meteos/api"
 

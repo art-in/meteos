@@ -4,7 +4,7 @@
         {
             "type": "shell",
             "label": "cargo run",
-            "command": "RUST_LOG=meteos cargo run",
+            "command": "cargo run",
             "group": "build",
             "presentation": {
                 "clear": true

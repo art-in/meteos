@@ -1,4 +1,5 @@
 use anyhow::Result;
+use log::LevelFilter;
 use std::{fs::File, io::Read, ops::Range, time::Duration};
 
 #[derive(Debug, serde::Deserialize, Clone)]
@@ -9,8 +10,9 @@ pub struct EnvironmentalReadingRanges {
     pub pressure: Range<f64>,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 pub struct Config {
+    pub log_level: LevelFilter,
     pub backend_url: String,
     pub tg_bot_token: String,
     check_interval_sec: u64,

@@ -58,7 +58,7 @@ impl TgBot {
     }
 
     pub async fn start_command_server(&self) {
-        log::info!("starting command server...");
+        log::debug!("starting command server...");
 
         let ctx = Ctx {
             subs: self.subs.clone(),
@@ -83,8 +83,8 @@ impl TgBot {
 }
 
 async fn send_message_impl(bot: &AutoSend<Bot>, chat_id: i64, message: TgMessage) -> Result<()> {
-    log::debug!(
-        "send_message(chat_id={chat_id}, message={message})",
+    log::trace!(
+        "send_message: chat_id={chat_id}, message=\n{message}",
         chat_id = chat_id,
         message = message.text
     );
@@ -135,6 +135,7 @@ async fn command_handler(
 }
 
 async fn on_command_help(bot: AutoSend<Bot>, message: teloxide::types::Message) -> Result<()> {
+    log::trace!("on_command_help: message={:?}", message);
     send_message_impl(
         &bot,
         message.chat.id.0,
@@ -152,6 +153,7 @@ async fn on_command_env(
     message: teloxide::types::Message,
     ctx: Ctx,
 ) -> Result<()> {
+    log::trace!("on_command_env: message={:?}", message);
     let latest_samples = ctx
         .backend_api
         .get_latest_samples(ctx.config.check_period)
@@ -181,6 +183,7 @@ async fn on_command_subscribe(
     message: teloxide::types::Message,
     ctx: Ctx,
 ) -> Result<()> {
+    log::trace!("on_command_subscribe: message={:?}", message);
     let sub = TgSubscription {
         chat_id: message.chat.id.0,
         chat_info: match message.chat.kind {
@@ -222,6 +225,7 @@ async fn on_command_unsubscribe(
     message: teloxide::types::Message,
     ctx: Ctx,
 ) -> Result<()> {
+    log::trace!("on_command_unsubscribe: message={:?}", message);
     let was_existing_sub = ctx
         .subs
         .lock()
