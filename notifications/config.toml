@@ -1,0 +1,28 @@
+# what level to use for filtering log messages dropped to stdout.
+# eg. "trace", "debug", "info", "warn", "error"
+log_level = "info"
+
+# where to fetch environment samples from
+backend_url = "https://example.org/meteos/api"
+
+# what telegram bot to use for subscribing and broadcasting notifications
+tg_bot_token = "0000000000:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+# how often to check environment conditions
+check_interval_sec = 600
+
+# samples from what latest period to use for checking environment conditions.
+# this should be equal or longer than sampling interval (see Sensor config),
+# otherwise no samples may be received from backend, which is considered error
+check_period_sec = 300
+
+# how long to wait for successful backend response after receiving first error 
+# until broadcasting error notification
+backend_error_timeout_sec = 900
+
+# what environment conditions are considered optimal 
+[optimal_ranges]
+temperature = [20, 26]
+humidity = [25, 60]
+co2 = [0, 900]
+pressure = [750, 770]

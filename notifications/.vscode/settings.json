@@ -1,0 +1,14 @@
+{
+  "editor.formatOnSave": true,
+  // match default rust style
+  "editor.tabSize": 4,
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "editor.semanticTokenColorCustomizations": {
+    "rules": {
+      "*.mutable": {
+        // do not underline mutable variables, because it's too much visual noise
+        "underline": false,
+      }
+    }
+  },
+}
