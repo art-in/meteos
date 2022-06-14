@@ -1,6 +1,5 @@
 #![warn(clippy::unwrap_used)]
 
-// TODO: add scripts for publishing to docker
 // TODO: refactor log messages
 
 use crate::{backend_api::BackendApi, config::Config};

@@ -5,7 +5,7 @@
   },
   "mounts": [
     // allow to access host docker engine from inside dev container for
-    // publishing docker image to hub while deploying production build
+    // pushing docker image to the Hub while deploying production build
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
   ],
   "extensions": [
