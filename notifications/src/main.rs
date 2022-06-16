@@ -7,8 +7,8 @@ use simple_logger::SimpleLogger;
 use std::sync::Arc;
 
 mod backend_api;
-mod check;
 mod config;
+mod monitor;
 mod notification;
 mod notifier;
 mod reading;
@@ -41,16 +41,16 @@ async fn main() -> Result<()> {
         }
     };
 
-    let check_task = {
+    let monitor_task = {
         let notifier = notifier.clone();
         async move {
-            check::start(notifier, config, backend_api)
+            monitor::start(notifier, config, backend_api)
                 .await
-                .expect("failed to run environment check service");
+                .expect("failed to run monitoring");
         }
     };
 
-    tokio::join!(subscription_task, check_task);
+    tokio::join!(subscription_task, monitor_task);
 
     Ok(())
 }

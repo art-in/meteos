@@ -9,12 +9,12 @@ backend_url = "https://example.org/meteos/api"
 tg_bot_token = "0000000000:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 # how often to check environment conditions
-check_interval_sec = 600
+monitoring_interval_sec = 600
 
-# samples from what latest period to use for checking environment conditions.
+# samples from what recent period to use for checking environment conditions.
 # this should be equal or longer than sampling interval (see Sensor config),
 # otherwise no samples may be received from backend, which is considered error
-check_period_sec = 300
+monitoring_period_sec = 300
 
 # how long to wait for successful backend response after receiving first error 
 # until broadcasting error notification

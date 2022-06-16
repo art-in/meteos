@@ -20,14 +20,16 @@ pub async fn start(
     config: Arc<Config>,
     backend_api: Arc<BackendApi>,
 ) -> Result<()> {
-    log::debug!("starting check loop...");
+    log::debug!("starting monitor loop...");
 
     let mut consecutive_errors: Option<ConsecutiveErrors> = None;
     let mut is_not_optimal_readings_notification_sent = false;
 
     loop {
         log::trace!("next iteration");
-        let latest_samples = backend_api.get_latest_samples(config.check_period).await;
+        let latest_samples = backend_api
+            .get_latest_samples(config.monitoring_period)
+            .await;
 
         match latest_samples {
             Ok(samples) => {
@@ -67,7 +69,7 @@ pub async fn start(
                 ];
 
                 // only broadcast notification if certain reading is not optimal in all samples of
-                // check period. this should smooth short-time spikes
+                // monitoring period. this should smooth short-time spikes
                 // eg. when co2 goes beyond range max for one minute when human is too close to
                 // the sensor, we don't want to raise alarm for that
                 let not_optimal_readings: Vec<ReadingOptimality> = readings_optimality
@@ -134,6 +136,6 @@ pub async fn start(
             }
         }
 
-        tokio::time::sleep(config.check_interval).await;
+        tokio::time::sleep(config.monitoring_interval).await;
     }
 }

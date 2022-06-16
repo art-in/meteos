@@ -155,7 +155,7 @@ async fn on_command_latest_sample(
     log::trace!("on_command_latest_sample: message={:?}", message);
     let latest_samples = ctx
         .backend_api
-        .get_latest_samples(ctx.config.check_period)
+        .get_latest_samples(ctx.config.monitoring_period)
         .await;
 
     let outgoing_message = match latest_samples {
