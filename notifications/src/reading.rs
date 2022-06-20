@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Reading {
     Temperature,
     Humidity,
@@ -16,7 +16,7 @@ pub enum Optimality {
     Mixed,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub struct ReadingOptimality {
     pub reading: Reading,
     pub optimality: Optimality,
